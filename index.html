@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>منصة المرصد الذكي</title>
 
+  <!-- Favicon / Logo -->
+  <link rel="icon" href="/logo.png" type="image/png" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -12,29 +15,47 @@
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;900&display=swap');
 
     body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f0f7ff; }
+
+    /* keep palette consistent */
+    :root{
+      --primary:#1e40af;
+      --bg:#f0f7ff;
+      --accent:#22c55e;
+    }
+
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
     .modal-active { display: flex !important; }
-    .glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(30,64,175,0.10); }
+
+    .glass-card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(30,64,175,0.10);
+    }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
     .entity-link { transition: all 0.2s; border: 1px solid transparent; }
-    .entity-link:hover { transform: translateY(-2px); border-color: #1e40af; background-color: #f0f7ff; }
+    .entity-link:hover { transform: translateY(-2px); border-color: var(--primary); background-color: var(--bg); }
 
     .status-badge { padding: 6px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; border: 1px solid transparent; cursor: pointer; }
     .priority-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; }
 
     .tab-active {
-      background-color: #1e40af !important;
+      background-color: var(--primary) !important;
       color: white !important;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
       font-weight: 900 !important;
     }
 
-    /* Prevent iOS zoom on form controls */
+    /* prevent iOS zoom on form controls */
     input, select, textarea { font-size: 16px; }
+
+    /* consistent icon sizing */
+    .icon-18 { font-size: 18px; }
+    .icon-20 { font-size: 20px; }
+    .icon-22 { font-size: 22px; }
   </style>
 </head>
 
@@ -47,7 +68,7 @@
 
         <div class="flex items-center gap-3">
           <div class="bg-blue-700 p-2.5 rounded-2xl text-white shadow-lg">
-            <i class="fa-solid fa-calendar-check text-2xl"></i>
+            <i class="fa-solid fa-calendar-check icon-22"></i>
           </div>
           <div>
             <h1 class="text-2xl font-black text-blue-900 tracking-tight">المرصد الذكي</h1>
@@ -57,7 +78,7 @@
 
         <div class="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div class="relative w-full sm:w-72 md:w-80">
-            <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-blue-400"></i>
+            <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 icon-18"></i>
             <input
               type="text"
               id="searchInput"
@@ -66,8 +87,9 @@
             />
           </div>
 
-          <button id="addEventBtn" onclick="openModal()" class="w-full sm:w-auto bg-blue-700 text-white px-6 py-2.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-800 shadow-lg active:scale-[0.99] transition-all">
-            <i class="fa-solid fa-plus"></i>
+          <button id="addEventBtn" onclick="openModal()"
+                  class="w-full sm:w-auto bg-blue-700 text-white px-6 py-2.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-800 shadow-lg active:scale-[0.99] transition-all duration-200">
+            <i class="fa-solid fa-plus icon-18"></i>
             <span class="font-black">إضافة حدث</span>
           </button>
         </div>
@@ -78,34 +100,50 @@
 
   <main class="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-8 py-4 md:py-8">
 
+    <!-- Hero / Banner -->
+    <section class="bg-blue-50 p-8 md:p-12 text-center rounded-3xl mb-6 md:mb-8 border border-blue-100 shadow-sm">
+      <h2 class="text-3xl md:text-4xl font-black text-blue-900 mb-3 md:mb-4">المرصد الذكي</h2>
+      <p class="text-base md:text-lg text-blue-700 mb-5 md:mb-6 font-medium">
+        منصة إدارة الفعاليات والأحداث للجهات الحكومية والخاصة
+      </p>
+      <button onclick="openModal()"
+              class="bg-blue-700 text-white px-8 py-3 rounded-2xl hover:bg-blue-800 shadow-lg hover:scale-[1.02] transition-all duration-200 font-black">
+        إضافة حدث جديد
+      </button>
+    </section>
+
     <!-- View Controls -->
     <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center mb-6 md:mb-8 gap-4">
 
       <div class="flex bg-white rounded-2xl p-1.5 border-2 border-blue-50 shadow-sm overflow-x-auto max-w-full" id="tabsContainer">
-        <button onclick="switchView('table')" id="tableBtn" class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all font-extrabold text-blue-700 hover:bg-blue-50 whitespace-nowrap">
-          <i class="fa-solid fa-table-list"></i> <span>الجدول التفاعلي</span>
+        <button onclick="switchView('table')" id="tableBtn"
+                class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 font-extrabold text-blue-700 hover:bg-blue-50 whitespace-nowrap">
+          <i class="fa-solid fa-table-list icon-18"></i> <span>الجدول التفاعلي</span>
         </button>
-        <button onclick="switchView('calendar')" id="calendarBtn" class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
-          <i class="fa-solid fa-calendar-day"></i> <span>التقويم</span>
+        <button onclick="switchView('calendar')" id="calendarBtn"
+                class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
+          <i class="fa-solid fa-calendar-day icon-18"></i> <span>التقويم</span>
         </button>
-        <button onclick="switchView('directory')" id="directoryBtn" class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
-          <i class="fa-solid fa-sitemap"></i> <span>دليل الجهات والمجموعات</span>
+        <button onclick="switchView('directory')" id="directoryBtn"
+                class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
+          <i class="fa-solid fa-sitemap icon-18"></i> <span>دليل الجهات والمجموعات</span>
         </button>
       </div>
 
-      <div id="calendarControls" class="hidden items-center justify-between gap-4 bg-white px-4 py-2.5 rounded-2xl border-2 border-blue-50">
-        <button onclick="changeMonth(-1)" class="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-700">
-          <i class="fa-solid fa-chevron-right"></i>
+      <div id="calendarControls" class="hidden items-center justify-between gap-4 bg-white px-4 py-2.5 rounded-2xl border-2 border-blue-50 shadow-sm">
+        <button onclick="changeMonth(-1)" class="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-700 transition-all duration-200">
+          <i class="fa-solid fa-chevron-right icon-18"></i>
         </button>
         <span id="currentMonthLabel" class="text-base md:text-lg font-black text-blue-900"></span>
-        <button onclick="changeMonth(1)" class="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-700">
-          <i class="fa-solid fa-chevron-left"></i>
+        <button onclick="changeMonth(1)" class="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-700 transition-all duration-200">
+          <i class="fa-solid fa-chevron-left icon-18"></i>
         </button>
       </div>
 
       <div id="directoryControls" class="hidden">
-        <button onclick="openEntityModal()" class="w-full lg:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-700 shadow-md font-black">
-          <i class="fa-solid fa-plus-circle"></i> إضافة جهة/رابط
+        <button onclick="openEntityModal()"
+                class="w-full lg:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg hover:scale-[1.02] transition-all duration-200 font-black">
+          <i class="fa-solid fa-plus-circle icon-18"></i> إضافة جهة/رابط
         </button>
       </div>
     </div>
@@ -114,10 +152,10 @@
     <div id="mainContainer">
 
       <!-- Table View -->
-      <div id="tableView" class="glass-card rounded-3xl shadow-xl overflow-hidden border-0">
+      <div id="tableView" class="glass-card rounded-3xl shadow-lg overflow-hidden border-0">
 
         <!-- Mobile cards -->
-        <div id="eventsCards" class="md:hidden p-3 space-y-3"></div>
+        <div id="eventsCards" class="md:hidden p-4 sm:p-6 space-y-3"></div>
 
         <!-- Desktop table -->
         <div class="hidden md:block overflow-x-auto">
@@ -141,10 +179,9 @@
       </div>
 
       <!-- Calendar View -->
-      <div id="calendarView" class="hidden glass-card rounded-3xl shadow-xl overflow-hidden border-0">
-
+      <div id="calendarView" class="hidden glass-card rounded-3xl shadow-lg overflow-hidden border-0">
         <!-- Mobile agenda -->
-        <div id="calendarAgenda" class="md:hidden p-3 space-y-3 bg-white"></div>
+        <div id="calendarAgenda" class="md:hidden p-4 sm:p-6 space-y-3 bg-white"></div>
 
         <!-- Desktop grid -->
         <div class="hidden md:block">
@@ -153,7 +190,6 @@
           </div>
           <div id="calendarGrid" class="calendar-grid bg-white"></div>
         </div>
-
       </div>
 
       <!-- Directory View -->
@@ -161,34 +197,35 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
-          <div class="glass-card rounded-3xl p-5 md:p-6">
+          <div class="glass-card rounded-3xl p-8 hover:scale-[1.01] transition-all duration-200 shadow-lg">
             <h3 class="text-lg font-black text-blue-900 mb-5 flex items-center gap-2 border-b pb-4">
-              <i class="fa-solid fa-building-shield text-blue-700"></i> الجهات الإشرافية
+              <i class="fa-solid fa-building-shield text-blue-700 icon-18"></i> الجهات الإشرافية
             </h3>
             <div id="supervisoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
           </div>
 
-          <div class="glass-card rounded-3xl p-5 md:p-6">
+          <div class="glass-card rounded-3xl p-8 hover:scale-[1.01] transition-all duration-200 shadow-lg">
             <h3 class="text-lg font-black text-blue-900 mb-5 flex items-center gap-2 border-b pb-4">
-              <i class="fa-solid fa-hand-holding-heart text-blue-700"></i> الجهات الداعمة
+              <i class="fa-solid fa-hand-holding-heart text-blue-700 icon-18"></i> الجهات الداعمة
             </h3>
             <div id="supportingGrid" class="grid grid-cols-1 gap-3"></div>
           </div>
 
-          <div class="glass-card rounded-3xl p-5 md:p-6 lg:col-span-2">
+          <div class="glass-card rounded-3xl p-8 lg:col-span-2 hover:scale-[1.01] transition-all duration-200 shadow-lg">
             <h3 class="text-lg font-black text-blue-900 mb-5 flex items-center gap-2 border-b pb-4">
-              <i class="fa-solid fa-users-gear text-blue-700"></i> كيانات القطاع والشركاء الفاعلين
+              <i class="fa-solid fa-users-gear text-blue-700 icon-18"></i> كيانات القطاع والشركاء الفاعلين
             </h3>
             <div id="partnersGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
           </div>
 
-          <div class="glass-card rounded-3xl p-5 md:p-6 bg-gradient-to-br from-green-50 to-white border-green-100 lg:col-span-2">
+          <div class="glass-card rounded-3xl p-8 bg-gradient-to-br from-green-50 to-white border-green-100 lg:col-span-2 shadow-lg hover:scale-[1.01] transition-all duration-200">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 border-b border-green-100 pb-4">
               <h3 class="text-lg font-black text-green-800 flex items-center gap-2">
-                <i class="fa-brands fa-whatsapp text-2xl text-green-600"></i> مجموعات الواتساب
+                <i class="fa-brands fa-whatsapp icon-22 text-green-600"></i> مجموعات الواتساب
               </h3>
-              <button onclick="openWhatsappModal()" class="text-sm bg-green-600 text-white px-4 py-2 rounded-2xl font-black hover:bg-green-700 w-full sm:w-auto">
-                <i class="fa-solid fa-plus ml-1"></i> إضافة مجموعة
+              <button onclick="openWhatsappModal()"
+                      class="text-sm bg-green-600 text-white px-4 py-2 rounded-2xl font-black hover:bg-green-700 shadow-lg hover:scale-[1.02] transition-all duration-200 w-full sm:w-auto">
+                <i class="fa-solid fa-plus ml-1 icon-18"></i> إضافة مجموعة
               </button>
             </div>
             <div id="whatsappGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -203,11 +240,11 @@
   <!-- Modal: Event -->
   <div id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
-    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-5 sm:p-8 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-start justify-between gap-4 mb-5">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-4 mb-6">
         <h2 id="modalTitle" class="text-xl sm:text-2xl font-black text-blue-900">إضافة حدث جديد</h2>
-        <button type="button" onclick="closeModal()" class="w-10 h-10 rounded-2xl hover:bg-blue-50 text-blue-800">
-          <i class="fa-solid fa-xmark text-xl"></i>
+        <button type="button" onclick="closeModal()" class="w-10 h-10 rounded-2xl hover:bg-blue-50 text-blue-800 transition-all duration-200">
+          <i class="fa-solid fa-xmark icon-20"></i>
         </button>
       </div>
 
@@ -264,8 +301,8 @@
         </div>
 
         <div class="flex flex-col sm:flex-row justify-end gap-2 mt-4 md:col-span-2">
-          <button type="button" onclick="closeModal()" class="px-6 py-2 rounded-2xl hover:bg-slate-50 font-black">إلغاء</button>
-          <button type="submit" class="bg-blue-700 text-white px-8 py-2 rounded-2xl font-black hover:bg-blue-800">حفظ</button>
+          <button type="button" onclick="closeModal()" class="px-6 py-2 rounded-2xl hover:bg-slate-50 font-black transition-all duration-200">إلغاء</button>
+          <button type="submit" class="bg-blue-700 text-white px-8 py-2 rounded-2xl font-black hover:bg-blue-800 shadow-lg hover:scale-[1.02] transition-all duration-200">حفظ</button>
         </div>
       </form>
     </div>
@@ -274,11 +311,11 @@
   <!-- Modal: Entity -->
   <div id="entityModal" role="dialog" aria-modal="true" aria-labelledby="entityModalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-5 sm:p-8">
-      <div class="flex items-start justify-between gap-4 mb-5">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 sm:p-10">
+      <div class="flex items-start justify-between gap-4 mb-6">
         <h2 id="entityModalTitle" class="text-lg sm:text-xl font-black text-blue-900">إضافة جهة جديدة</h2>
-        <button type="button" onclick="closeEntityModal()" class="w-10 h-10 rounded-2xl hover:bg-blue-50 text-blue-800">
-          <i class="fa-solid fa-xmark text-xl"></i>
+        <button type="button" onclick="closeEntityModal()" class="w-10 h-10 rounded-2xl hover:bg-blue-50 text-blue-800 transition-all duration-200">
+          <i class="fa-solid fa-xmark icon-20"></i>
         </button>
       </div>
 
@@ -293,8 +330,8 @@
         </select>
 
         <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2">
-          <button type="button" onclick="closeEntityModal()" class="px-4 py-2 rounded-2xl hover:bg-slate-50 font-black">إلغاء</button>
-          <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-2xl font-black hover:bg-blue-700">حفظ</button>
+          <button type="button" onclick="closeEntityModal()" class="px-4 py-2 rounded-2xl hover:bg-slate-50 font-black transition-all duration-200">إلغاء</button>
+          <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-2xl font-black hover:bg-blue-700 shadow-lg hover:scale-[1.02] transition-all duration-200">حفظ</button>
         </div>
       </form>
     </div>
@@ -303,11 +340,11 @@
   <!-- Modal: WhatsApp -->
   <div id="whatsappModal" role="dialog" aria-modal="true" aria-labelledby="waModalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-5 sm:p-8">
-      <div class="flex items-start justify-between gap-4 mb-5">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 sm:p-10">
+      <div class="flex items-start justify-between gap-4 mb-6">
         <h2 id="waModalTitle" class="text-lg sm:text-xl font-black text-green-800">إدارة المجموعة</h2>
-        <button type="button" onclick="closeWhatsappModal()" class="w-10 h-10 rounded-2xl hover:bg-green-50 text-green-800">
-          <i class="fa-solid fa-xmark text-xl"></i>
+        <button type="button" onclick="closeWhatsappModal()" class="w-10 h-10 rounded-2xl hover:bg-green-50 text-green-800 transition-all duration-200">
+          <i class="fa-solid fa-xmark icon-20"></i>
         </button>
       </div>
 
@@ -317,8 +354,8 @@
         <input id="waUrl" placeholder="رابط الواتساب" required dir="ltr" class="w-full border p-3 rounded-2xl outline-none">
 
         <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2">
-          <button type="button" onclick="closeWhatsappModal()" class="px-4 py-2 rounded-2xl hover:bg-slate-50 font-black">إلغاء</button>
-          <button type="submit" class="bg-green-600 text-white px-8 py-2 rounded-2xl font-black hover:bg-green-700">حفظ</button>
+          <button type="button" onclick="closeWhatsappModal()" class="px-4 py-2 rounded-2xl hover:bg-slate-50 font-black transition-all duration-200">إلغاء</button>
+          <button type="submit" class="bg-green-600 text-white px-8 py-2 rounded-2xl font-black hover:bg-green-700 shadow-lg hover:scale-[1.02] transition-all duration-200">حفظ</button>
         </div>
       </form>
     </div>
@@ -328,19 +365,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // IMPORTANT: Use anon key only (as you are doing). Ensure RLS policies match your intended access model.
     const SUPABASE_URL = "https://hfwdocyrhiwspitmpvgg.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmd2RvY3lyaGl3c3BpdG1wdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMjAxNTcsImV4cCI6MjA4Mzc5NjE1N30.or59DKhlc7UcY4EQh-TOcCc3lNILgMvU0KpR-lsCL5g";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // App State
     let events = [];
     let entities = [];
     let whatsappGroups = [];
     let currentView = 'table';
     let viewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    // Helpers
     function safeLower(v) { return (v || '').toString().toLowerCase(); }
 
     function getGoogleCalendarLink(ev) {
@@ -394,7 +428,6 @@
       return { id: row.id, name: row.name || '', url: row.url || '' };
     }
 
-    // Supabase Data Load
     async function loadData() {
       const { data: eData, error: eErr } = await supabaseClient.from('events').select('*');
       if (eErr) console.error('Events Load Error:', eErr);
@@ -411,18 +444,17 @@
       render();
     }
 
-    // Render: Table
     function renderTable() {
       const tbody = document.getElementById('eventsTableBody');
       if (!tbody) return;
 
       tbody.innerHTML = events.map(ev => `
-        <tr class="hover:bg-blue-50/50 transition-all event-row"
+        <tr class="hover:bg-blue-50/50 transition-all duration-200 event-row"
             data-name="${safeLower(ev.name)}"
             data-owner="${safeLower(ev.owner)}">
           <td class="px-6 py-5">
             <div class="font-black text-blue-900">${ev.name}</div>
-            ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[11px] text-blue-600 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+            ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[11px] text-blue-600 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square icon-18"></i></a>` : ''}
           </td>
 
           <td class="px-4 py-5">
@@ -445,16 +477,16 @@
 
           <td class="px-6 py-5 text-center">
             <div class="flex gap-4 justify-center">
-              <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-600 hover:scale-110 transition-transform">
-                <i class="fa-solid fa-calendar-plus text-lg"></i>
+              <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-600 hover:scale-110 transition-all duration-200">
+                <i class="fa-solid fa-calendar-plus icon-20"></i>
               </a>
 
-              <button onclick="editEvent('${ev.id}')" class="text-blue-600 hover:scale-110 transition-transform" title="تعديل">
-                <i class="fa-solid fa-pen-to-square text-lg"></i>
+              <button onclick="editEvent('${ev.id}')" class="text-blue-600 hover:scale-110 transition-all duration-200" title="تعديل">
+                <i class="fa-solid fa-pen-to-square icon-20"></i>
               </button>
 
-              <button onclick="deleteEvent('${ev.id}')" class="text-red-500 hover:scale-110 transition-transform" title="حذف">
-                <i class="fa-solid fa-trash-can text-lg"></i>
+              <button onclick="deleteEvent('${ev.id}')" class="text-red-500 hover:scale-110 transition-all duration-200" title="حذف">
+                <i class="fa-solid fa-trash-can icon-20"></i>
               </button>
             </div>
           </td>
@@ -462,13 +494,12 @@
       `).join('');
     }
 
-    // Render: Mobile cards
     function renderCards() {
       const wrap = document.getElementById('eventsCards');
       if (!wrap) return;
 
       wrap.innerHTML = events.map(ev => `
-        <div class="bg-white rounded-3xl border border-blue-50 shadow-sm p-4 space-y-3 event-card"
+        <div class="bg-white rounded-3xl border border-blue-50 shadow-lg p-5 sm:p-6 space-y-3 event-card hover:scale-[1.01] transition-all duration-200"
              data-name="${safeLower(ev.name)}"
              data-owner="${safeLower(ev.owner)}">
 
@@ -500,14 +531,14 @@
             </select>
 
             <div class="flex gap-4">
-              <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-600">
-                <i class="fa-solid fa-calendar-plus text-lg"></i>
+              <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-600 hover:scale-110 transition-all duration-200">
+                <i class="fa-solid fa-calendar-plus icon-20"></i>
               </a>
-              <button onclick="editEvent('${ev.id}')" class="text-blue-600" title="تعديل">
-                <i class="fa-solid fa-pen-to-square text-lg"></i>
+              <button onclick="editEvent('${ev.id}')" class="text-blue-600 hover:scale-110 transition-all duration-200" title="تعديل">
+                <i class="fa-solid fa-pen-to-square icon-20"></i>
               </button>
-              <button onclick="deleteEvent('${ev.id}')" class="text-red-500" title="حذف">
-                <i class="fa-solid fa-trash-can text-lg"></i>
+              <button onclick="deleteEvent('${ev.id}')" class="text-red-500 hover:scale-110 transition-all duration-200" title="حذف">
+                <i class="fa-solid fa-trash-can icon-20"></i>
               </button>
             </div>
           </div>
@@ -517,7 +548,6 @@
       `).join('');
     }
 
-    // Render: Calendar (desktop grid + mobile agenda)
     function renderCalendarAgenda(month, year) {
       const el = document.getElementById('calendarAgenda');
       if (!el) return;
@@ -528,7 +558,7 @@
         .sort((a,b) => (a.start||'').localeCompare(b.start||''));
 
       if (!inMonth.length) {
-        el.innerHTML = `<div class="text-sm text-slate-600 bg-blue-50 rounded-3xl p-4 font-bold">لا توجد فعاليات هذا الشهر.</div>`;
+        el.innerHTML = `<div class="text-sm text-slate-600 bg-blue-50 rounded-3xl p-5 sm:p-6 font-bold shadow-sm">لا توجد فعاليات هذا الشهر.</div>`;
         return;
       }
 
@@ -536,7 +566,7 @@
       inMonth.forEach(e => { (groups[e.start] ||= []).push(e); });
 
       el.innerHTML = Object.keys(groups).sort().map(date => `
-        <div class="bg-white border border-blue-50 rounded-3xl p-4">
+        <div class="bg-white border border-blue-50 rounded-3xl p-5 sm:p-6 shadow-lg hover:scale-[1.01] transition-all duration-200">
           <div class="font-black text-blue-900 mb-3">${date}</div>
           <div class="space-y-2">
             ${groups[date].map(e => `
@@ -562,10 +592,8 @@
       const year = viewDate.getFullYear();
       label.innerText = `${new Intl.DateTimeFormat('ar-SA', { month: 'long' }).format(viewDate)} ${year}`;
 
-      // Mobile agenda
       renderCalendarAgenda(month, year);
 
-      // Desktop grid
       if (!grid) return;
       grid.innerHTML = '';
 
@@ -593,7 +621,6 @@
       }
     }
 
-    // Render: Directory
     function renderDirectory() {
       const grids = {
         supervisory: document.getElementById('supervisoryGrid'),
@@ -604,11 +631,11 @@
 
       entities.forEach(ent => {
         const html = `
-          <div class="entity-link p-4 rounded-3xl bg-white shadow-sm flex items-center justify-between font-extrabold gap-3">
+          <div class="entity-link p-4 rounded-3xl bg-white shadow-lg flex items-center justify-between font-extrabold gap-3 hover:scale-[1.01] transition-all duration-200">
             <a href="${ent.url}" target="_blank" class="text-slate-800 hover:text-blue-700 flex-grow min-w-0 truncate">${ent.name}</a>
             <div class="flex gap-2 shrink-0">
-              <button onclick="editEntity('${ent.id}')" class="text-blue-600" title="تعديل"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="deleteEntity('${ent.id}')" class="text-red-500" title="حذف"><i class="fa-solid fa-trash text-xs"></i></button>
+              <button onclick="editEntity('${ent.id}')" class="text-blue-600" title="تعديل"><i class="fa-solid fa-pen icon-18"></i></button>
+              <button onclick="deleteEntity('${ent.id}')" class="text-red-500" title="حذف"><i class="fa-solid fa-trash icon-18"></i></button>
             </div>
           </div>
         `;
@@ -619,14 +646,14 @@
       if (!waGrid) return;
 
       waGrid.innerHTML = whatsappGroups.map(wa => `
-        <div class="flex flex-col items-center p-6 rounded-3xl bg-white border-2 border-green-50 shadow-sm relative">
+        <div class="flex flex-col items-center p-6 rounded-3xl bg-white border-2 border-green-50 shadow-lg relative hover:scale-[1.01] transition-all duration-200">
           <div class="absolute top-3 left-3 flex gap-2">
-            <button onclick="openWhatsappModal('${wa.id}')" class="text-blue-500" title="تعديل"><i class="fa-solid fa-pen text-xs"></i></button>
-            <button onclick="deleteWhatsappGroup('${wa.id}')" class="text-red-500" title="حذف"><i class="fa-solid fa-trash text-xs"></i></button>
+            <button onclick="openWhatsappModal('${wa.id}')" class="text-blue-500" title="تعديل"><i class="fa-solid fa-pen icon-18"></i></button>
+            <button onclick="deleteWhatsappGroup('${wa.id}')" class="text-red-500" title="حذف"><i class="fa-solid fa-trash icon-18"></i></button>
           </div>
           <a href="${wa.url}" target="_blank" class="flex flex-col items-center gap-2">
             <div class="w-11 h-11 bg-green-100 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-users text-green-700"></i>
+              <i class="fa-solid fa-users icon-18 text-green-700"></i>
             </div>
             <span class="font-black text-slate-800 text-sm text-center">${wa.name}</span>
             <span class="text-xs text-green-700 font-bold underline" dir="ltr">Open</span>
@@ -640,10 +667,9 @@
       renderCards();
       renderCalendar();
       renderDirectory();
-      applySearchFilter(); // keep filtering consistent across views/cards/table
+      applySearchFilter();
     }
 
-    // View switching
     function switchView(view) {
       currentView = view;
 
@@ -667,18 +693,15 @@
       renderCalendar();
     }
 
-    // Search
     function applySearchFilter() {
       const term = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
-      // Table rows
       document.querySelectorAll('.event-row').forEach(r => {
         const name = r.getAttribute('data-name') || '';
         const owner = r.getAttribute('data-owner') || '';
         r.style.display = (!term || name.includes(term) || owner.includes(term)) ? '' : 'none';
       });
 
-      // Cards
       document.querySelectorAll('.event-card').forEach(c => {
         const name = c.getAttribute('data-name') || '';
         const owner = c.getAttribute('data-owner') || '';
@@ -688,12 +711,9 @@
 
     document.getElementById('searchInput').addEventListener('input', applySearchFilter);
 
-    // Supabase Mutations: Events
     async function updateStatus(id, newStatus) {
       events = events.map(e => (String(e.id) === String(id) ? { ...e, status: newStatus } : e));
-      renderTable();
-      renderCards();
-      renderCalendar();
+      renderTable(); renderCards(); renderCalendar();
 
       const { error } = await supabaseClient.from('events').update({ status: newStatus }).eq('id', id);
       if (error) {
@@ -717,7 +737,6 @@
         status: data.status,
         link: data.link
       };
-
       if (!isNew) payload.id = data.id;
 
       const { error } = await supabaseClient.from('events').upsert(payload);
@@ -732,10 +751,8 @@
       await loadData();
     }
 
-    // Supabase Mutations: Entities
     async function upsertEntity(data) {
       const isNew = !data.id;
-
       const payload = { name: data.name, url: data.url, category: data.category };
       if (!isNew) payload.id = data.id;
 
@@ -751,10 +768,8 @@
       await loadData();
     }
 
-    // Supabase Mutations: WhatsApp groups
     async function upsertWhatsapp(data) {
       const isNew = !data.id;
-
       const payload = { name: data.name, url: data.url };
       if (!isNew) payload.id = data.id;
 
@@ -770,7 +785,6 @@
       await loadData();
     }
 
-    // Modal helpers (focus + ESC + outside click)
     let lastFocusEl = null;
 
     function showModal(modalId, focusId) {
@@ -790,13 +804,10 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeModal();
-        closeEntityModal();
-        closeWhatsappModal();
+        closeModal(); closeEntityModal(); closeWhatsappModal();
       }
     });
 
-    // close when clicking overlay
     ['eventModal','entityModal','whatsappModal'].forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener('click', (e) => {
@@ -808,7 +819,6 @@
       });
     });
 
-    // Modal: Event
     function openModal(id = null) {
       const f = document.getElementById('eventForm');
       f.reset();
@@ -842,7 +852,6 @@
       const id = document.getElementById('eventId').value;
       const a1 = document.getElementById('fAssignee1').value.trim();
       const a2 = document.getElementById('fAssignee2').value.trim();
-
       const old = id ? events.find(ev => String(ev.id) === String(id)) : null;
 
       const data = {
@@ -859,28 +868,18 @@
         status: old?.status || 'لم تبدأ'
       };
 
-      try {
-        await upsertEvent(data);
-        closeModal();
-      } catch (err) {
-        console.error('Save Event Error:', err);
-        alert('حدث خطأ أثناء حفظ الحدث. راجع Console للتفاصيل.');
-      }
+      try { await upsertEvent(data); closeModal(); }
+      catch (err) { console.error('Save Event Error:', err); alert('حدث خطأ أثناء حفظ الحدث. راجع Console للتفاصيل.'); }
     };
 
     function editEvent(id) { openModal(id); }
 
     async function deleteEvent(id) {
       if (!confirm('حذف الحدث؟')) return;
-      try {
-        await removeEvent(id);
-      } catch (err) {
-        console.error('Delete Event Error:', err);
-        alert('حدث خطأ أثناء حذف الحدث.');
-      }
+      try { await removeEvent(id); }
+      catch (err) { console.error('Delete Event Error:', err); alert('حدث خطأ أثناء حذف الحدث.'); }
     }
 
-    // Modal: Entity
     function openEntityModal(id = null) {
       document.getElementById('entId').value = id || '';
 
@@ -913,28 +912,18 @@
         category: document.getElementById('entCat').value
       };
 
-      try {
-        await upsertEntity(data);
-        closeEntityModal();
-      } catch (err) {
-        console.error('Save Entity Error:', err);
-        alert('حدث خطأ أثناء حفظ الجهة.');
-      }
+      try { await upsertEntity(data); closeEntityModal(); }
+      catch (err) { console.error('Save Entity Error:', err); alert('حدث خطأ أثناء حفظ الجهة.'); }
     };
 
     function editEntity(id) { openEntityModal(id); }
 
     async function deleteEntity(id) {
       if (!confirm('حذف الجهة؟')) return;
-      try {
-        await removeEntity(id);
-      } catch (err) {
-        console.error('Delete Entity Error:', err);
-        alert('حدث خطأ أثناء حذف الجهة.');
-      }
+      try { await removeEntity(id); }
+      catch (err) { console.error('Delete Entity Error:', err); alert('حدث خطأ أثناء حذف الجهة.'); }
     }
 
-    // Modal: WhatsApp
     function openWhatsappModal(id = null) {
       document.getElementById('waId').value = id || '';
 
@@ -956,34 +945,24 @@
 
     document.getElementById('waForm').onsubmit = async (e) => {
       e.preventDefault();
-
       const id = document.getElementById('waId').value;
+
       const data = {
         id: id || undefined,
         name: document.getElementById('waName').value,
         url: document.getElementById('waUrl').value
       };
 
-      try {
-        await upsertWhatsapp(data);
-        closeWhatsappModal();
-      } catch (err) {
-        console.error('Save WhatsApp Error:', err);
-        alert('حدث خطأ أثناء حفظ المجموعة.');
-      }
+      try { await upsertWhatsapp(data); closeWhatsappModal(); }
+      catch (err) { console.error('Save WhatsApp Error:', err); alert('حدث خطأ أثناء حفظ المجموعة.'); }
     };
 
     async function deleteWhatsappGroup(id) {
       if (!confirm('حذف مجموعة الواتساب؟')) return;
-      try {
-        await removeWhatsapp(id);
-      } catch (err) {
-        console.error('Delete WhatsApp Error:', err);
-        alert('حدث خطأ أثناء حذف مجموعة الواتساب.');
-      }
+      try { await removeWhatsapp(id); }
+      catch (err) { console.error('Delete WhatsApp Error:', err); alert('حدث خطأ أثناء حذف مجموعة الواتساب.'); }
     }
 
-    // Init
     window.onload = async () => {
       await loadData();
       switchView('table');
