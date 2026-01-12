@@ -1,1039 +1,775 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
-
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة المرصد الذكي</title>
 
-    <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>منصة المرصد الذكي</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-    <style>
-
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-
-        body {
-
-            font-family: 'Noto Sans Arabic', sans-serif;
-
-            background-color: #f0f7ff;
-
-        }
-
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-
-        .modal-active { display: flex !important; }
-
-        .glass-card {
-
-            background: rgba(255, 255, 255, 0.95);
-
-            backdrop-filter: blur(10px);
-
-            border: 1px solid rgba(30, 64, 175, 0.1);
-
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-
-        ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 10px; }
-
-       
-
-        .container-expanded { max-width: 95% !important; }
-
-
-        .entity-link {
-
-            transition: all 0.2s;
-
-            border: 1px solid transparent;
-
-        }
-
-        .entity-link:hover {
-
-            transform: translateY(-2px);
-
-            border-color: #1e40af;
-
-            background-color: #f0f7ff;
-
-        }
-
-        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; border: 1px solid transparent; cursor: pointer; }
-
-        .priority-badge { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
-
-       
-
-        /* التبويبات النشطة */
-
-        .tab-active {
-
-            background-color: #1e40af !important;
-
-            color: white !important;
-
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-
-            font-weight: bold !important;
-
-        }
-
-    </style>
-
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f0f7ff; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .modal-active { display: flex !important; }
+    .glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(30,64,175,0.1); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 10px; }
+    .container-expanded { max-width: 95% !important; }
+    .entity-link { transition: all 0.2s; border: 1px solid transparent; }
+    .entity-link:hover { transform: translateY(-2px); border-color: #1e40af; background-color: #f0f7ff; }
+    .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; border: 1px solid transparent; cursor: pointer; }
+    .priority-badge { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
+    .tab-active {
+      background-color: #1e40af !important;
+      color: white !important;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
+      font-weight: bold !important;
+    }
+  </style>
 </head>
 
 <body class="text-slate-900 min-h-screen">
 
-
-    <!-- Header -->
-
-    <header class="bg-white border-b sticky top-0 z-30 p-4 shadow-md border-blue-100">
-
-        <div class="container-expanded mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-
-            <div class="flex items-center gap-3">
-
-                <div class="bg-blue-700 p-2.5 rounded-2xl text-white shadow-lg">
-
-                    <i class="fa-solid fa-calendar-check text-2xl"></i>
-
-                </div>
-
-                <div>
-
-                    <h1 class="text-2xl font-black text-blue-900 tracking-tight">المرصد الذكي </h1>
-
-                    <p class="text-xs text-blue-600 font-medium">منصة إدارة الفعاليات والأحداث</p>
-
-                </div>
-
-            </div>
-
-           
-
-            <div class="flex items-center gap-3">
-
-                <div class="relative group">
-
-                    <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-blue-400"></i>
-
-                    <input type="text" id="searchInput" placeholder="ابحث باسم الحدث أو المالك..." class="pr-10 pl-4 py-2.5 border-2 border-blue-50 rounded-2xl text-sm focus:border-blue-500 outline-none w-48 md:w-80 transition-all">
-
-                </div>
-
-                <button onclick="openModal()" class="bg-blue-700 text-white px-6 py-2.5 rounded-2xl flex items-center gap-2 hover:bg-blue-800 shadow-lg active:scale-95 transition-all">
-
-                    <i class="fa-solid fa-plus"></i>
-
-                    <span class="font-bold">إضافة حدث</span>
-
-                </button>
-
-            </div>
-
+  <!-- Header -->
+  <header class="bg-white border-b sticky top-0 z-30 p-4 shadow-md border-blue-100">
+    <div class="container-expanded mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-700 p-2.5 rounded-2xl text-white shadow-lg">
+          <i class="fa-solid fa-calendar-check text-2xl"></i>
         </div>
-
-    </header>
-
-
-    <main class="container-expanded mx-auto p-4 md:p-8">
-
-        <!-- View Controls -->
-
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-
-            <div class="flex bg-white rounded-2xl p-1.5 border-2 border-blue-50 shadow-sm overflow-x-auto max-w-full" id="tabsContainer">
-
-                <button onclick="switchView('table')" id="tableBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all font-semibold text-blue-600 hover:bg-blue-50">
-
-                    <i class="fa-solid fa-table-list"></i> <span>الجدول التفاعلي</span>
-
-                </button>
-
-                <button onclick="switchView('calendar')" id="calendarBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all text-blue-600 hover:bg-blue-50 font-semibold">
-
-                    <i class="fa-solid fa-calendar-day"></i> <span>التقويم</span>
-
-                </button>
-
-                <button onclick="switchView('directory')" id="directoryBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all text-blue-600 hover:bg-blue-50 font-semibold">
-
-                    <i class="fa-solid fa-sitemap"></i> <span>دليل الجهات والمجموعات</span>
-
-                </button>
-
-            </div>
-
-           
-
-            <div id="calendarControls" class="hidden flex items-center gap-6 bg-white px-6 py-2.5 rounded-2xl border-2 border-blue-50">
-
-                <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full hover:bg-blue-50 text-blue-700"><i class="fa-solid fa-chevron-right"></i></button>
-
-                <span id="currentMonthLabel" class="text-lg font-black text-blue-900"></span>
-
-                <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full hover:bg-blue-50 text-blue-700"><i class="fa-solid fa-chevron-left"></i></button>
-
-            </div>
-
-
-            <div id="directoryControls" class="hidden">
-
-                <button onclick="openEntityModal()" class="bg-blue-600 text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-blue-700 shadow-md">
-
-                    <i class="fa-solid fa-plus-circle"></i> إضافة جهة/رابط
-
-                </button>
-
-            </div>
-
+        <div>
+          <h1 class="text-2xl font-black text-blue-900 tracking-tight">المرصد الذكي</h1>
+          <p class="text-xs text-blue-600 font-medium">منصة إدارة الفعاليات والأحداث</p>
         </div>
-
-
-        <!-- Views -->
-
-        <div id="mainContainer">
-
-            <!-- Table View -->
-
-            <div id="tableView" class="glass-card rounded-3xl shadow-xl overflow-hidden border-0">
-
-                <div class="overflow-x-auto">
-
-                    <table class="w-full text-sm">
-
-                        <thead class="bg-blue-700 text-white">
-
-                            <tr>
-
-                                <th class="px-6 py-5 text-right font-bold">الحدث</th>
-
-                                <th class="px-4 py-5 text-right font-bold">الأولوية</th>
-
-                                <th class="px-4 py-5 text-right font-bold">المالك</th>
-
-                                <th class="px-4 py-5 text-right font-bold">المسند إليه</th>
-
-                                <th class="px-4 py-5 text-right font-bold">الموقع</th>
-
-                                <th class="px-4 py-5 text-right font-bold">التاريخ</th>
-
-                                <th class="px-4 py-5 text-right font-bold">الحالة</th>
-
-                                <th class="px-6 py-5 text-center">إجراءات</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="eventsTableBody" class="divide-y divide-blue-50"></tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            <!-- Calendar View -->
-
-            <div id="calendarView" class="hidden glass-card rounded-3xl shadow-xl overflow-hidden border-0">
-
-                <div class="calendar-grid bg-blue-50/50 text-center text-xs font-black text-blue-800">
-
-                    <div class="py-4">الأحد</div><div class="py-4">الاثنين</div><div class="py-4">الثلاثاء</div><div class="py-4">الأربعاء</div><div class="py-4">الخميس</div><div class="py-4 text-red-500">الجمعة</div><div class="py-4">السبت</div>
-
-                </div>
-
-                <div id="calendarGrid" class="calendar-grid bg-white"></div>
-
-            </div>
-
-
-            <!-- Directory View -->
-
-            <div id="directoryView" class="hidden space-y-8">
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                    <div class="glass-card rounded-3xl p-6">
-
-                        <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
-
-                            <i class="fa-solid fa-building-shield text-blue-700"></i> الجهات الإشرافية
-
-                        </h3>
-
-                        <div id="supervisoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-
-                    </div>
-
-                    <div class="glass-card rounded-3xl p-6">
-
-                        <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
-
-                            <i class="fa-solid fa-hand-holding-heart text-blue-700"></i> الجهات الداعمة
-
-                        </h3>
-
-                        <div id="supportingGrid" class="grid grid-cols-1 gap-3"></div>
-
-                    </div>
-
-                    <div class="glass-card rounded-3xl p-6 lg:col-span-2">
-
-                        <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
-
-                            <i class="fa-solid fa-users-gear text-blue-700"></i> كيانات القطاع والشركاء الفاعلين
-
-                        </h3>
-
-                        <div id="partnersGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
-
-                    </div>
-
-                    <div class="glass-card rounded-3xl p-6 bg-gradient-to-br from-green-50 to-white border-green-100 lg:col-span-2">
-
-                        <div class="flex justify-between items-center mb-6 border-b border-green-100 pb-4">
-
-                            <h3 class="text-lg font-black text-green-800 flex items-center gap-2">
-
-                                <i class="fa-brands fa-whatsapp text-2xl text-green-600"></i> مجموعات الواتساب
-
-                            </h3>
-
-                            <button onclick="openWhatsappModal()" class="text-sm bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold hover:bg-green-700">
-
-                                <i class="fa-solid fa-plus ml-1"></i> إضافة مجموعة
-
-                            </button>
-
-                        </div>
-
-                        <div id="whatsappGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative group">
+          <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-blue-400"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="ابحث باسم الحدث أو المالك..."
+            class="pr-10 pl-4 py-2.5 border-2 border-blue-50 rounded-2xl text-sm focus:border-blue-500 outline-none w-48 md:w-80 transition-all"
+          />
         </div>
+        <button onclick="openModal()" class="bg-blue-700 text-white px-6 py-2.5 rounded-2xl flex items-center gap-2 hover:bg-blue-800 shadow-lg active:scale-95 transition-all">
+          <i class="fa-solid fa-plus"></i>
+          <span class="font-bold">إضافة حدث</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-    </main>
+  <main class="container-expanded mx-auto p-4 md:p-8">
 
+    <!-- View Controls -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <div class="flex bg-white rounded-2xl p-1.5 border-2 border-blue-50 shadow-sm overflow-x-auto max-w-full" id="tabsContainer">
+        <button onclick="switchView('table')" id="tableBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all font-semibold text-blue-600 hover:bg-blue-50">
+          <i class="fa-solid fa-table-list"></i> <span>الجدول التفاعلي</span>
+        </button>
+        <button onclick="switchView('calendar')" id="calendarBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all text-blue-600 hover:bg-blue-50 font-semibold">
+          <i class="fa-solid fa-calendar-day"></i> <span>التقويم</span>
+        </button>
+        <button onclick="switchView('directory')" id="directoryBtn" class="flex items-center gap-2 px-6 py-2 rounded-xl transition-all text-blue-600 hover:bg-blue-50 font-semibold">
+          <i class="fa-solid fa-sitemap"></i> <span>دليل الجهات والمجموعات</span>
+        </button>
+      </div>
 
-    <!-- Modal: Event -->
+      <div id="calendarControls" class="hidden flex items-center gap-6 bg-white px-6 py-2.5 rounded-2xl border-2 border-blue-50">
+        <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full hover:bg-blue-50 text-blue-700"><i class="fa-solid fa-chevron-right"></i></button>
+        <span id="currentMonthLabel" class="text-lg font-black text-blue-900"></span>
+        <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full hover:bg-blue-50 text-blue-700"><i class="fa-solid fa-chevron-left"></i></button>
+      </div>
 
-    <div id="eventModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
-
-        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
-
-            <h2 id="modalTitle" class="text-2xl font-black text-blue-900 mb-6">إضافة حدث جديد</h2>
-
-            <form id="eventForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <input type="hidden" id="eventId">
-
-                <div class="md:col-span-2">
-
-                    <label class="text-sm font-bold block mb-1">اسم الحدث</label>
-
-                    <input id="fName" required class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
-
-                </div>
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">الأولوية</label>
-
-                    <select id="fPriority" class="w-full border p-3 rounded-xl outline-none">
-
-                        <option value="عالي الأولوية">عالي الأولوية</option>
-
-                        <option value="متوسط الأولوية">متوسط الأولوية</option>
-
-                        <option value="منخفض الأولوية">منخفض الأولوية</option>
-
-                    </select>
-
-                </div>
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">المالك</label>
-
-                    <input id="fOwner" class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-
-                <!-- ✅ تعديل هنا: مسند إليه 1 + مسند إليه 2 (اختياري) -->
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">المسند إليه (1)</label>
-
-                    <input id="fAssignee1" placeholder="اسم الشخص المسؤول" class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">المسند إليه (2) (اختياري)</label>
-
-                    <input id="fAssignee2" placeholder="اسم شخص إضافي (اختياري)" class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">الموقع</label>
-
-                    <input id="fLoc" class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">تاريخ البدء</label>
-
-                    <input type="date" id="fStart" required class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-                <div>
-
-                    <label class="text-sm font-bold block mb-1">تاريخ الانتهاء</label>
-
-                    <input type="date" id="fEnd" required class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-                <div class="md:col-span-2">
-
-                    <label class="text-sm font-bold block mb-1">رابط الفعالية</label>
-
-                    <input id="fLink" dir="ltr" class="w-full border p-3 rounded-xl outline-none">
-
-                </div>
-
-                <div class="flex justify-end gap-2 mt-6 md:col-span-2">
-
-                    <button type="button" onclick="closeModal()" class="px-6 py-2">إلغاء</button>
-
-                    <button type="submit" class="bg-blue-700 text-white px-8 py-2 rounded-xl font-bold">حفظ</button>
-
-                </div>
-
-            </form>
-
-        </div>
-
+      <div id="directoryControls" class="hidden">
+        <button onclick="openEntityModal()" class="bg-blue-600 text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-blue-700 shadow-md">
+          <i class="fa-solid fa-plus-circle"></i> إضافة جهة/رابط
+        </button>
+      </div>
     </div>
 
+    <!-- Views -->
+    <div id="mainContainer">
 
-    <!-- Modals for Entity and Whatsapp -->
-
-    <div id="entityModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
-
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8">
-
-            <h2 class="text-xl font-black text-blue-900 mb-6">إضافة جهة جديدة</h2>
-
-            <form id="entityForm" class="space-y-4">
-
-                <input id="entName" placeholder="اسم الجهة" required class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
-
-                <input id="entUrl" placeholder="رابط الموقع الرسمي" required dir="ltr" class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
-
-                <select id="entCat" class="w-full border p-3 rounded-xl outline-none">
-
-                    <option value="supervisory">جهة إشرافية</option>
-
-                    <option value="supporting">جهة داعمة</option>
-
-                    <option value="partners">شريك فاعل</option>
-
-                </select>
-
-                <div class="flex justify-end gap-2 mt-4"><button type="button" onclick="closeEntityModal()" class="px-4 py-2">إلغاء</button><button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold">حفظ</button></div>
-
-            </form>
-
+      <!-- Table View -->
+      <div id="tableView" class="glass-card rounded-3xl shadow-xl overflow-hidden border-0">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-blue-700 text-white">
+              <tr>
+                <th class="px-6 py-5 text-right font-bold">الحدث</th>
+                <th class="px-4 py-5 text-right font-bold">الأولوية</th>
+                <th class="px-4 py-5 text-right font-bold">المالك</th>
+                <th class="px-4 py-5 text-right font-bold">المسند إليه</th>
+                <th class="px-4 py-5 text-right font-bold">الموقع</th>
+                <th class="px-4 py-5 text-right font-bold">التاريخ</th>
+                <th class="px-4 py-5 text-right font-bold">الحالة</th>
+                <th class="px-6 py-5 text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody" class="divide-y divide-blue-50"></tbody>
+          </table>
         </div>
+      </div>
+
+      <!-- Calendar View -->
+      <div id="calendarView" class="hidden glass-card rounded-3xl shadow-xl overflow-hidden border-0">
+        <div class="calendar-grid bg-blue-50/50 text-center text-xs font-black text-blue-800">
+          <div class="py-4">الأحد</div><div class="py-4">الاثنين</div><div class="py-4">الثلاثاء</div><div class="py-4">الأربعاء</div><div class="py-4">الخميس</div><div class="py-4 text-red-500">الجمعة</div><div class="py-4">السبت</div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid bg-white"></div>
+      </div>
+
+      <!-- Directory View -->
+      <div id="directoryView" class="hidden space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-card rounded-3xl p-6">
+            <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
+              <i class="fa-solid fa-building-shield text-blue-700"></i> الجهات الإشرافية
+            </h3>
+            <div id="supervisoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+
+          <div class="glass-card rounded-3xl p-6">
+            <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
+              <i class="fa-solid fa-hand-holding-heart text-blue-700"></i> الجهات الداعمة
+            </h3>
+            <div id="supportingGrid" class="grid grid-cols-1 gap-3"></div>
+          </div>
+
+          <div class="glass-card rounded-3xl p-6 lg:col-span-2">
+            <h3 class="text-lg font-black text-blue-900 mb-6 flex items-center gap-2 border-b pb-4">
+              <i class="fa-solid fa-users-gear text-blue-700"></i> كيانات القطاع والشركاء الفاعلين
+            </h3>
+            <div id="partnersGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+          </div>
+
+          <div class="glass-card rounded-3xl p-6 bg-gradient-to-br from-green-50 to-white border-green-100 lg:col-span-2">
+            <div class="flex justify-between items-center mb-6 border-b border-green-100 pb-4">
+              <h3 class="text-lg font-black text-green-800 flex items-center gap-2">
+                <i class="fa-brands fa-whatsapp text-2xl text-green-600"></i> مجموعات الواتساب
+              </h3>
+              <button onclick="openWhatsappModal()" class="text-sm bg-green-600 text-white px-4 py-1.5 rounded-lg font-bold hover:bg-green-700">
+                <i class="fa-solid fa-plus ml-1"></i> إضافة مجموعة
+              </button>
+            </div>
+            <div id="whatsappGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+          </div>
+        </div>
+      </div>
 
     </div>
+  </main>
 
+  <!-- Modal: Event -->
+  <div id="eventModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+      <h2 id="modalTitle" class="text-2xl font-black text-blue-900 mb-6">إضافة حدث جديد</h2>
 
-    <div id="whatsappModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
+      <form id="eventForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="eventId">
 
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8">
-
-            <h2 id="waModalTitle" class="text-xl font-black text-green-800 mb-6">إدارة المجموعة</h2>
-
-            <form id="waForm" class="space-y-4">
-
-                <input type="hidden" id="waId">
-
-                <input id="waName" placeholder="اسم المجموعة" required class="w-full border p-3 rounded-xl outline-none">
-
-                <input id="waUrl" placeholder="رابط الواتساب" required dir="ltr" class="w-full border p-3 rounded-xl outline-none">
-
-                <div class="flex justify-end gap-2 mt-4"><button type="button" onclick="closeWhatsappModal()" class="px-4 py-2">إلغاء</button><button type="submit" class="bg-green-600 text-white px-8 py-2 rounded-xl font-bold">حفظ</button></div>
-
-            </form>
-
+        <div class="md:col-span-2">
+          <label class="text-sm font-bold block mb-1">اسم الحدث</label>
+          <input id="fName" required class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
         </div>
 
+        <div>
+          <label class="text-sm font-bold block mb-1">الأولوية</label>
+          <select id="fPriority" class="w-full border p-3 rounded-xl outline-none">
+            <option value="عالي الأولوية">عالي الأولوية</option>
+            <option value="متوسط الأولوية">متوسط الأولوية</option>
+            <option value="منخفض الأولوية">منخفض الأولوية</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">المالك</label>
+          <input id="fOwner" class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">المسند إليه (1)</label>
+          <input id="fAssignee1" placeholder="اسم الشخص المسؤول" class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">المسند إليه (2) (اختياري)</label>
+          <input id="fAssignee2" placeholder="اسم شخص إضافي (اختياري)" class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">الموقع</label>
+          <input id="fLoc" class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">تاريخ البدء</label>
+          <input type="date" id="fStart" required class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm font-bold block mb-1">تاريخ الانتهاء</label>
+          <input type="date" id="fEnd" required class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="text-sm font-bold block mb-1">رابط الفعالية</label>
+          <input id="fLink" dir="ltr" class="w-full border p-3 rounded-xl outline-none">
+        </div>
+
+        <div class="flex justify-end gap-2 mt-6 md:col-span-2">
+          <button type="button" onclick="closeModal()" class="px-6 py-2">إلغاء</button>
+          <button type="submit" class="bg-blue-700 text-white px-8 py-2 rounded-xl font-bold">حفظ</button>
+        </div>
+      </form>
     </div>
+  </div>
 
+  <!-- Modal: Entity -->
+  <div id="entityModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8">
+      <h2 class="text-xl font-black text-blue-900 mb-6">إضافة جهة جديدة</h2>
+      <form id="entityForm" class="space-y-4">
+        <input type="hidden" id="entId">
+        <input id="entName" placeholder="اسم الجهة" required class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
+        <input id="entUrl" placeholder="رابط الموقع الرسمي" required dir="ltr" class="w-full border p-3 rounded-xl outline-none focus:border-blue-500">
+        <select id="entCat" class="w-full border p-3 rounded-xl outline-none">
+          <option value="supervisory">جهة إشرافية</option>
+          <option value="supporting">جهة داعمة</option>
+          <option value="partners">شريك فاعل</option>
+        </select>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button" onclick="closeEntityModal()" class="px-4 py-2">إلغاء</button>
+          <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold">حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-    <script>
-      const SUPABASE_URL = "https://hfwdocyrhiwspitmpvgg.supabase.co";
-      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmd2RvY3lyaGl3c3BpdG1wdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMjAxNTcsImV4cCI6MjA4Mzc5NjE1N30.or59DKhlc7UcY4EQh-TOcCc3lNILgMvU0KpR-lsCL5g";
-    
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    </script>
+  <!-- Modal: WhatsApp -->
+  <div id="whatsappModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8">
+      <h2 id="waModalTitle" class="text-xl font-black text-green-800 mb-6">إدارة المجموعة</h2>
+      <form id="waForm" class="space-y-4">
+        <input type="hidden" id="waId">
+        <input id="waName" placeholder="اسم المجموعة" required class="w-full border p-3 rounded-xl outline-none">
+        <input id="waUrl" placeholder="رابط الواتساب" required dir="ltr" class="w-full border p-3 rounded-xl outline-none">
 
-    <script>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button" onclick="closeWhatsappModal()" class="px-4 py-2">إلغاء</button>
+          <button type="submit" class="bg-green-600 text-white px-8 py-2 rounded-xl font-bold">حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-        // Data Store
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // IMPORTANT:
+    // Use your Supabase project's anon key (NOT service role key) for frontend.
+    const SUPABASE_URL = "https://hfwdocyrhiwspitmpvgg.supabase.co";
+    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
 
-        let events = [
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            { id: 1, name: 'ملتقى قيادات القطاع غير الربحي بالشرقية', priority: 'عالي الأولوية', owner: 'مجلس الجمعيات الأهلية', assignee1: 'أحمد المحمد', assignee2: '', location: 'الخبر', status: 'لم تبدأ', start: '2026-01-20', end: '2026-01-20', link: 'https://t.co/uXI6zsfEA6' },
+    // App State
+    let events = [];
+    let entities = [];
+    let whatsappGroups = [];
 
-            { id: 2, name: 'منتدى التمكين الرقمي', priority: 'متوسط الأولوية', owner: 'مؤسسة نورة الملاحي', assignee1: 'سارة العبدالله', assignee2: '', location: 'الرياض', status: 'لم تبدأ', start: '2026-01-26', end: '2026-01-27', link: 'https://t.co/E5PdlKtpW5' },
+    let currentView = 'table';
+    let viewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-            { id: 3, name: 'معرض إينا الدولي', priority: 'عالي الأولوية', owner: 'الهيئة العامة للمعارض والمؤتمرات', assignee1: 'خالد الفهد', assignee2: '', location: 'الرياض', status: 'لم تبدأ', start: '2026-05-11', end: '2026-05-13', link: 'https://ienaexpoksa.com/' }
+    // Helpers
+    function safeLower(v) { return (v || '').toString().toLowerCase(); }
 
-        ];
+    function getGoogleCalendarLink(ev) {
+      // For all-day events, Google expects end date as next day (exclusive). We'll add 1 day for better accuracy.
+      const start = (ev.start || '').replace(/-/g, '');
+      const endDate = new Date(ev.end || ev.start);
+      endDate.setDate(endDate.getDate() + 1);
+      const end = `${endDate.getFullYear()}${String(endDate.getMonth()+1).padStart(2,'0')}${String(endDate.getDate()).padStart(2,'0')}`;
 
+      return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.name || '')}&dates=${start}/${end}&details=${encodeURIComponent(ev.link || '')}&location=${encodeURIComponent(ev.location || 'الرياض')}`;
+    }
 
-        let entities = [
+    function getPriorityClass(p) {
+      if ((p || '').includes('عالي')) return 'bg-red-100 text-red-700 border-red-200';
+      if ((p || '').includes('متوسط')) return 'bg-orange-100 text-orange-700 border-orange-200';
+      return 'bg-green-100 text-green-700 border-green-200';
+    }
 
-            { id: 1, name: 'الهيئة العامة للأوقاف', url: 'https://www.awqaf.gov.sa/ar/media-center/news', category: 'supervisory' },
+    function getStatusClass(s) {
+      if (s === 'مكتملة') return 'bg-green-600 text-white';
+      if (s === 'قيد التنفيذ') return 'bg-blue-500 text-white';
+      return 'bg-slate-200 text-slate-600';
+    }
 
-            { id: 2, name: 'المركز الوطني لتنمية القطاع', url: 'https://ncnp.gov.sa/ar', category: 'supervisory' },
+    function formatAssignees(ev) {
+      const a1 = (ev.assignee1 || '').trim();
+      const a2 = (ev.assignee2 || '').trim();
+      if (a1 && a2) return `${a1}، ${a2}`;
+      return a1 || a2 || '-';
+    }
 
-            { id: 3, name: 'مجلس الجمعيات الأهلية', url: 'https://ccsa.org.sa/', category: 'supervisory' },
+    function normalizeEventRow(row) {
+      // Ensure your Supabase columns match these names.
+      return {
+        id: row.id,
+        name: row.name || '',
+        priority: row.priority || 'متوسط الأولوية',
+        owner: row.owner || '',
+        assignee1: row.assignee1 || '',
+        assignee2: row.assignee2 || '',
+        location: row.location || '',
+        status: row.status || 'لم تبدأ',
+        start: row.start || '',
+        end: row.end || row.start || '',
+        link: row.link || ''
+      };
+    }
 
-            { id: 4, name: 'مجلس المؤسسات الأهلية', url: 'https://cof.sa/', category: 'supervisory' },
+    function normalizeEntityRow(row) {
+      return {
+        id: row.id,
+        name: row.name || '',
+        url: row.url || '',
+        category: row.category || 'supervisory'
+      };
+    }
 
-            { id: 5, name: 'مركز المنشآت العائلية', url: 'https://ncfb.sa/home', category: 'supervisory' },
+    function normalizeWhatsappRow(row) {
+      return { id: row.id, name: row.name || '', url: row.url || '' };
+    }
 
-            { id: 6, name: 'غرفة الرياض (لجنة الأوقاف)', url: 'http://www.awqaf.org.sa/', category: 'supporting' },
+    // Supabase Data Load
+    async function loadData() {
+      const { data: eData, error: eErr } = await supabaseClient.from('events').select('*').order('start', { ascending: true });
+      if (eErr) console.error('Events Load Error:', eErr);
+      events = (eData || []).map(normalizeEventRow);
 
-            { id: 7, name: 'غرفة الشرقية', url: 'https://www.chamber.org.sa/sites/Arabic/Pages/HomePage.aspx', category: 'supporting' },
+      const { data: enData, error: enErr } = await supabaseClient.from('entities').select('*').order('id', { ascending: true });
+      if (enErr) console.error('Entities Load Error:', enErr);
+      entities = (enData || []).map(normalizeEntityRow);
 
-            { id: 8, name: 'غرفة جدة ', url: 'https://www.jcci.org.sa/', category: 'supporting' },
+      const { data: wData, error: wErr } = await supabaseClient.from('whatsapp_groups').select('*').order('id', { ascending: true });
+      if (wErr) console.error('WhatsApp Load Error:', wErr);
+      whatsappGroups = (wData || []).map(normalizeWhatsappRow);
 
-            { id: 9, name: 'مركز الملك سلمان للإغاثة', url: 'https://www.ksrelief.org/ar', category: 'partners' },
+      render();
+    }
 
-            { id: 10, name: 'مؤسسة مسك', url: 'https://misk.org.sa/', category: 'partners' },
+    // Render Functions
+    function renderTable() {
+      const tbody = document.getElementById('eventsTableBody');
+      tbody.innerHTML = events.map(ev => `
+        <tr class="hover:bg-blue-50/50 transition-all event-row"
+            data-name="${safeLower(ev.name)}"
+            data-owner="${safeLower(ev.owner)}">
+          <td class="px-6 py-5">
+            <div class="font-bold text-blue-900">${ev.name}</div>
+            ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[10px] text-blue-500 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+          </td>
 
-            { id: 11, name: 'مؤسسة الملك فيصل الخيرية', url: 'https://www.kff.com/ar/', category: 'partners' },
+          <td class="px-4 py-5">
+            <span class="priority-badge border ${getPriorityClass(ev.priority)}">${ev.priority}</span>
+          </td>
 
-            { id: 12, name: 'مؤسسة الملك خالد الخيرية', url: 'https://www.kkf.org.sa/', category: 'partners' },
+          <td class="px-4 py-5 font-medium">${ev.owner || '-'}</td>
+          <td class="px-4 py-5 font-medium text-blue-700">${formatAssignees(ev)}</td>
+          <td class="px-4 py-5 text-gray-500">${ev.location || 'غير محدد'}</td>
+          <td class="px-4 py-5 font-mono text-xs">${ev.start || '-'}</td>
 
-            { id: 13, name: 'مؤسسة الأمير طلال الخيرية', url: 'https://talalfoundation.sa/', category: 'partners' },
+          <td class="px-4 py-5">
+            <select onchange="updateStatus('${ev.id}', this.value)"
+                    class="status-badge ${getStatusClass(ev.status)} outline-none">
+              <option value="لم تبدأ" ${ev.status === 'لم تبدأ' ? 'selected' : ''}>لم تبدأ</option>
+              <option value="قيد التنفيذ" ${ev.status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
+              <option value="مكتملة" ${ev.status === 'مكتملة' ? 'selected' : ''}>مكتملة</option>
+            </select>
+          </td>
 
-            { id: 14, name: 'مؤسسة الملك عبدالله الإنسانية', url: 'https://kahf.org.sa/', category: 'partners' },
+          <td class="px-6 py-5 text-center">
+            <div class="flex gap-3 justify-center">
+              <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-500 hover:scale-110 transition-transform">
+                <i class="fa-solid fa-calendar-plus text-lg"></i>
+              </a>
 
-            { id: 15, name: ' مركز المعرفة للقطاع غير الربحي', url: 'https://kmnpoorg.minasatech.com/', category: 'partners' },
+              <button onclick="editEvent('${ev.id}')" class="text-blue-500 hover:scale-110 transition-transform">
+                <i class="fa-solid fa-pen-to-square text-lg"></i>
+              </button>
 
-            { id: 16, name: 'مؤسسة عبد الله السبيعي الخيرية', url: 'https://asf.org.sa/ar/', category: 'partners' }
+              <button onclick="deleteEvent('${ev.id}')" class="text-red-400 hover:scale-110 transition-transform">
+                <i class="fa-solid fa-trash-can text-lg"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-        ];
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      const label = document.getElementById('currentMonthLabel');
+      grid.innerHTML = '';
 
+      const month = viewDate.getMonth();
+      const year = viewDate.getFullYear();
+      label.innerText = `${new Intl.DateTimeFormat('ar-SA', { month: 'long' }).format(viewDate)} ${year}`;
 
-        let whatsappGroups = [
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            { id: 1, name: 'المجموعة الأولى (القيادات)', url: '#' },
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="h-28 bg-gray-50/50 border border-blue-50/20"></div>`;
+      }
 
-            { id: 2, name: 'مجموعة التنسيق الإعلامي', url: '#' }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayEvents = events.filter(e => e.start === dateStr);
 
-        ];
+        grid.innerHTML += `
+          <div class="h-28 border border-blue-50 p-2">
+            <span class="text-xs font-bold text-gray-300">${d}</span>
+            ${dayEvents.map(e => `<div class="text-[9px] text-white p-1 rounded mt-1 truncate ${getStatusClass(e.status)}" title="${e.name}">${e.name}</div>`).join('')}
+          </div>
+        `;
+      }
+    }
 
+    function renderDirectory() {
+      const grids = {
+        supervisory: document.getElementById('supervisoryGrid'),
+        supporting: document.getElementById('supportingGrid'),
+        partners: document.getElementById('partnersGrid')
+      };
+      Object.values(grids).forEach(g => g.innerHTML = '');
 
-        let currentView = 'table';
+      entities.forEach(ent => {
+        const html = `
+          <div class="entity-link p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between font-bold">
+            <a href="${ent.url}" target="_blank" class="text-slate-700 hover:text-blue-600 flex-grow">${ent.name}</a>
+            <div class="flex gap-2">
+              <button onclick="editEntity('${ent.id}')" class="text-blue-500" title="تعديل"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteEntity('${ent.id}')" class="text-red-400" title="حذف"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </div>
+        `;
+        if (grids[ent.category]) grids[ent.category].innerHTML += html;
+      });
 
-        let viewDate = new Date(2026, 0, 1);
+      const waGrid = document.getElementById('whatsappGrid');
+      waGrid.innerHTML = whatsappGroups.map(wa => `
+        <div class="flex flex-col items-center p-6 rounded-3xl bg-white border-2 border-green-50 shadow-sm relative group">
+          <div class="absolute top-2 left-2 flex gap-2">
+            <button onclick="openWhatsappModal('${wa.id}')" class="text-blue-400"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button onclick="deleteWhatsappGroup('${wa.id}')" class="text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+          </div>
+          <a href="${wa.url}" target="_blank" class="flex flex-col items-center">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fa-solid fa-users text-green-600"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">${wa.name}</span>
+          </a>
+        </div>
+      `).join('');
+    }
 
+    function render() {
+      renderTable();
+      renderCalendar();
+      renderDirectory();
+    }
 
-        // Calendar Helper
+    // View note: avoid rendering calendar/directory repeatedly if you want performance; keeping consistent with your original behavior.
+    function switchView(view) {
+      currentView = view;
 
-        function getGoogleCalendarLink(ev) {
+      document.getElementById('tableView').classList.toggle('hidden', view !== 'table');
+      document.getElementById('calendarView').classList.toggle('hidden', view !== 'calendar');
+      document.getElementById('directoryView').classList.toggle('hidden', view !== 'directory');
+      document.getElementById('calendarControls').classList.toggle('hidden', view !== 'calendar');
+      document.getElementById('directoryControls').classList.toggle('hidden', view !== 'directory');
 
-            const start = ev.start.replace(/-/g, '');
+      document.querySelectorAll('#tabsContainer button').forEach(btn => btn.classList.remove('tab-active'));
+      document.getElementById(`${view}Btn`).classList.add('tab-active');
 
-            const end = ev.end.replace(/-/g, '');
+      render();
+    }
 
-            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.name)}&dates=${start}/${end}&details=${encodeURIComponent(ev.link)}&location=${encodeURIComponent(ev.location || 'الرياض')}`;
+    function changeMonth(dir) {
+      viewDate.setMonth(viewDate.getMonth() + dir);
+      renderCalendar();
+    }
 
+    // Search
+    document.getElementById('searchInput').oninput = (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      const rows = document.querySelectorAll('.event-row');
+      rows.forEach(r => {
+        const name = r.getAttribute('data-name') || '';
+        const owner = r.getAttribute('data-owner') || '';
+        r.style.display = (name.includes(term) || owner.includes(term)) ? '' : 'none';
+      });
+    };
+
+    // Supabase Mutations: Events
+    async function updateStatus(id, newStatus) {
+      // optimistic update
+      events = events.map(e => (String(e.id) === String(id) ? { ...e, status: newStatus } : e));
+      renderTable();
+      renderCalendar();
+
+      const { error } = await supabaseClient.from('events').update({ status: newStatus }).eq('id', id);
+      if (error) {
+        console.error('Update Status Error:', error);
+        await loadData();
+      }
+    }
+
+    async function upsertEvent(data) {
+      // If you use UUID id in Supabase, keep id as string. If bigint identity, omit id for insert.
+      const payload = { ...data };
+
+      const isNew = !payload.id;
+      if (isNew) delete payload.id;
+
+      const { data: saved, error } = await supabaseClient.from('events').upsert(payload).select('*');
+      if (error) throw error;
+
+      await loadData();
+      return saved;
+    }
+
+    async function removeEvent(id) {
+      const { error } = await supabaseClient.from('events').delete().eq('id', id);
+      if (error) throw error;
+      await loadData();
+    }
+
+    // Supabase Mutations: Entities
+    async function upsertEntity(data) {
+      const payload = { ...data };
+      const isNew = !payload.id;
+      if (isNew) delete payload.id;
+
+      const { error } = await supabaseClient.from('entities').upsert(payload);
+      if (error) throw error;
+      await loadData();
+    }
+
+    async function removeEntity(id) {
+      const { error } = await supabaseClient.from('entities').delete().eq('id', id);
+      if (error) throw error;
+      await loadData();
+    }
+
+    // Supabase Mutations: WhatsApp groups
+    async function upsertWhatsapp(data) {
+      const payload = { ...data };
+      const isNew = !payload.id;
+      if (isNew) delete payload.id;
+
+      const { error } = await supabaseClient.from('whatsapp_groups').upsert(payload);
+      if (error) throw error;
+      await loadData();
+    }
+
+    async function removeWhatsapp(id) {
+      const { error } = await supabaseClient.from('whatsapp_groups').delete().eq('id', id);
+      if (error) throw error;
+      await loadData();
+    }
+
+    // Modal: Event
+    function openModal(id = null) {
+      const f = document.getElementById('eventForm');
+      f.reset();
+
+      document.getElementById('eventId').value = id || '';
+      document.getElementById('modalTitle').innerText = id ? 'تعديل الحدث' : 'إضافة حدث جديد';
+
+      if (id) {
+        const ev = events.find(e => String(e.id) === String(id));
+        if (ev) {
+          document.getElementById('fName').value = ev.name || '';
+          document.getElementById('fPriority').value = ev.priority || 'متوسط الأولوية';
+          document.getElementById('fOwner').value = ev.owner || '';
+          document.getElementById('fAssignee1').value = ev.assignee1 || '';
+          document.getElementById('fAssignee2').value = ev.assignee2 || '';
+          document.getElementById('fStart').value = ev.start || '';
+          document.getElementById('fEnd').value = ev.end || ev.start || '';
+          document.getElementById('fLoc').value = ev.location || '';
+          document.getElementById('fLink').value = ev.link || '';
         }
-
-
-        // Color Logic
-
-        function getPriorityClass(p) {
-
-            if (p.includes('عالي')) return 'bg-red-100 text-red-700 border-red-200';
-
-            if (p.includes('متوسط')) return 'bg-orange-100 text-orange-700 border-orange-200';
-
-            return 'bg-green-100 text-green-700 border-green-200';
-
-        }
-
-
-        function getStatusClass(s) {
-
-            if (s === 'مكتملة') return 'bg-green-600 text-white';
-
-            if (s === 'قيد التنفيذ') return 'bg-blue-500 text-white';
-
-            return 'bg-slate-200 text-slate-600';
-
-        }
-
-
-        function formatAssignees(ev) {
-
-            const a1 = (ev.assignee1 || '').trim();
-
-            const a2 = (ev.assignee2 || '').trim();
-
-            if (a1 && a2) return `${a1}، ${a2}`;
-
-            return a1 || a2 || '-';
-
-        }
-
-
-        // Render Functions
-
-        function renderTable() {
-
-            const tbody = document.getElementById('eventsTableBody');
-
-            tbody.innerHTML = events.map(ev => `
-
-                <tr class="hover:bg-blue-50/50 transition-all event-row" data-name="${ev.name.toLowerCase()}" data-owner="${ev.owner.toLowerCase()}">
-
-                    <td class="px-6 py-5">
-
-                        <div class="font-bold text-blue-900">${ev.name}</div>
-
-                        ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[10px] text-blue-500 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
-
-                    </td>
-
-                    <td class="px-4 py-5">
-
-                        <span class="priority-badge border ${getPriorityClass(ev.priority)}">${ev.priority}</span>
-
-                    </td>
-
-                    <td class="px-4 py-5 font-medium">${ev.owner}</td>
-
-                    <td class="px-4 py-5 font-medium text-blue-700">${formatAssignees(ev)}</td>
-
-                    <td class="px-4 py-5 text-gray-500">${ev.location || 'غير محدد'}</td>
-
-                    <td class="px-4 py-5 font-mono text-xs">${ev.start}</td>
-
-                    <td class="px-4 py-5">
-
-                        <select onchange="updateStatus(${ev.id}, this.value)" class="status-badge ${getStatusClass(ev.status)} outline-none">
-
-                            <option value="لم تبدأ" ${ev.status === 'لم تبدأ' ? 'selected' : ''}>لم تبدأ</option>
-
-                            <option value="قيد التنفيذ" ${ev.status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
-
-                            <option value="مكتملة" ${ev.status === 'مكتملة' ? 'selected' : ''}>مكتملة</option>
-
-                        </select>
-
-                    </td>
-
-                    <td class="px-6 py-5 text-center flex gap-3 justify-center">
-
-                        <a href="${getGoogleCalendarLink(ev)}" target="_blank" title="إضافة للتقويم" class="text-emerald-500 hover:scale-110 transition-transform">
-
-                            <i class="fa-solid fa-calendar-plus text-lg"></i>
-
-                        </a>
-
-                        <button onclick="editEvent(${ev.id})" class="text-blue-500 hover:scale-110 transition-transform">
-
-                            <i class="fa-solid fa-pen-to-square text-lg"></i>
-
-                        </button>
-
-                        <button onclick="deleteEvent(${ev.id})" class="text-red-400 hover:scale-110 transition-transform">
-
-                            <i class="fa-solid fa-trash-can text-lg"></i>
-
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `).join('');
-
-        }
-
-
-        function renderCalendar() {
-
-            const grid = document.getElementById('calendarGrid');
-
-            const label = document.getElementById('currentMonthLabel');
-
-            grid.innerHTML = '';
-
-            const month = viewDate.getMonth();
-
-            const year = viewDate.getFullYear();
-
-            label.innerText = `${new Intl.DateTimeFormat('ar-SA', {month: 'long'}).format(viewDate)} ${year}`;
-
-            const firstDay = new Date(year, month, 1).getDay();
-
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="h-28 bg-gray-50/50 border border-blue-50/20"></div>`;
-
-            for (let d = 1; d <= daysInMonth; d++) {
-
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-
-                const hasEvents = events.filter(e => e.start === dateStr);
-
-                grid.innerHTML += `
-
-                    <div class="h-28 border border-blue-50 p-2">
-
-                        <span class="text-xs font-bold text-gray-300">${d}</span>
-
-                        ${hasEvents.map(e => `<div class="text-[9px] text-white p-1 rounded mt-1 truncate ${getStatusClass(e.status)}" title="${e.name}">${e.name}</div>`).join('')}
-
-                    </div>`;
-
-            }
-
-        }
-
-
-        function renderDirectory() {
-
-            const grids = { supervisory: document.getElementById('supervisoryGrid'), supporting: document.getElementById('supportingGrid'), partners: document.getElementById('partnersGrid') };
-
-            Object.values(grids).forEach(g => g.innerHTML = '');
-
-            entities.forEach(ent => {
-
-                const html = `
-
-                    <div class="entity-link p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between font-bold">
-
-                        <a href="${ent.url}" target="_blank" class="text-slate-700 hover:text-blue-600 flex-grow">${ent.name}</a>
-
-                    </div>`;
-
-                if (grids[ent.category]) grids[ent.category].innerHTML += html;
-
-            });
-
-            const waGrid = document.getElementById('whatsappGrid');
-
-            waGrid.innerHTML = whatsappGroups.map(wa => `
-
-                <div class="flex flex-col items-center p-6 rounded-3xl bg-white border-2 border-green-50 shadow-sm relative group">
-
-                    <div class="absolute top-2 left-2 flex gap-2">
-
-                        <button onclick="openWhatsappModal(${wa.id})" class="text-blue-400"><i class="fa-solid fa-pen text-xs"></i></button>
-
-                    </div>
-
-                    <a href="${wa.url}" target="_blank" class="flex flex-col items-center">
-
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2"><i class="fa-solid fa-users text-green-600"></i></div>
-
-                        <span class="font-bold text-slate-700 text-sm">${wa.name}</span>
-
-                    </a>
-
-                </div>`).join('');
-
-        }
-
-
-        // App Logic
-
-        function switchView(view) {
-
-            currentView = view;
-
-           
-
-            // تحديث ظهور الحاويات
-
-            document.getElementById('tableView').classList.toggle('hidden', view !== 'table');
-
-            document.getElementById('calendarView').classList.toggle('hidden', view !== 'calendar');
-
-            document.getElementById('directoryView').classList.toggle('hidden', view !== 'directory');
-
-            document.getElementById('calendarControls').classList.toggle('hidden', view !== 'calendar');
-
-            document.getElementById('directoryControls').classList.toggle('hidden', view !== 'directory');
-
-           
-
-            // تحديث مظهر الأزرار (تفاعلي)
-
-            document.querySelectorAll('#tabsContainer button').forEach(btn => {
-
-                btn.classList.remove('tab-active');
-
-            });
-
-            document.getElementById(`${view}Btn`).classList.add('tab-active');
-
-
-            render();
-
-        }
-
-
-        function render() {
-
-            renderTable();
-
-            renderCalendar();
-
-            renderDirectory();
-
-        }
-
-
-        function updateStatus(id, newStatus) {
-
-            events = events.map(e => e.id === id ? {...e, status: newStatus} : e);
-
-            render();
-
-        }
-
-
-        // Search logic
-
-        document.getElementById('searchInput').oninput = (e) => {
-
-            const term = e.target.value.toLowerCase().trim();
-
-            const rows = document.querySelectorAll('.event-row');
-
-            rows.forEach(r => {
-
-                const name = r.getAttribute('data-name');
-
-                const owner = r.getAttribute('data-owner');
-
-                if (name.includes(term) || owner.includes(term)) r.style.display = '';
-
-                else r.style.display = 'none';
-
-            });
-
-        };
-
-
-        function changeMonth(dir) { viewDate.setMonth(viewDate.getMonth() + dir); renderCalendar(); }
-
-       
-
-        function openModal(id = null) {
-
-            const f = document.getElementById('eventForm'); f.reset();
-
-            document.getElementById('eventId').value = id || '';
-
-            document.getElementById('modalTitle').innerText = id ? 'تعديل الحدث' : 'إضافة حدث جديد';
-
-            if(id) {
-
-                const ev = events.find(e => e.id === id);
-
-                document.getElementById('fName').value = ev.name;
-
-                document.getElementById('fPriority').value = ev.priority;
-
-                document.getElementById('fOwner').value = ev.owner;
-
-
-                // ✅ تعبئة الحقلين
-
-                document.getElementById('fAssignee1').value = ev.assignee1 || '';
-
-                document.getElementById('fAssignee2').value = ev.assignee2 || '';
-
-
-                document.getElementById('fStart').value = ev.start;
-
-                document.getElementById('fEnd').value = ev.end;
-
-                document.getElementById('fLoc').value = ev.location;
-
-                document.getElementById('fLink').value = ev.link;
-
-            }
-
-            document.getElementById('eventModal').classList.add('modal-active');
-
-        }
-
-        function closeModal() { document.getElementById('eventModal').classList.remove('modal-active'); }
-
-       
-
-        document.getElementById('eventForm').onsubmit = (e) => {
-
-            e.preventDefault();
-
-            const id = document.getElementById('eventId').value;
-
-
-            const a1 = document.getElementById('fAssignee1').value.trim();
-
-            const a2 = document.getElementById('fAssignee2').value.trim();
-
-
-            const data = {
-
-                id: id ? parseInt(id) : Date.now(),
-
-                name: document.getElementById('fName').value,
-
-                priority: document.getElementById('fPriority').value,
-
-                owner: document.getElementById('fOwner').value,
-
-
-                // ✅ حفظ حقلين منفصلين
-
-                assignee1: a1,
-
-                assignee2: a2,
-
-
-                location: document.getElementById('fLoc').value,
-
-                start: document.getElementById('fStart').value,
-
-                end: document.getElementById('fEnd').value,
-
-                link: document.getElementById('fLink').value,
-
-                status: id ? events.find(ev => ev.id === parseInt(id)).status : 'لم تبدأ'
-
-            };
-
-            if(id) events = events.map(ev => ev.id === parseInt(id) ? data : ev);
-
-            else events.push(data);
-
-            closeModal(); render();
-
-        };
-
-
-        function editEvent(id) { openModal(id); }
-
-        function deleteEvent(id) { if(confirm('حذف الحدث؟')) { events = events.filter(e => e.id !== id); render(); } }
-
-
-        function openEntityModal() { document.getElementById('entityModal').classList.add('modal-active'); }
-
-        function closeEntityModal() { document.getElementById('entityModal').classList.remove('modal-active'); }
-
-        document.getElementById('entityForm').onsubmit = (e) => {
-
-            e.preventDefault();
-
-            entities.push({id: Date.now(), name: document.getElementById('entName').value, url: document.getElementById('entUrl').value, category: document.getElementById('entCat').value});
-
-            closeEntityModal(); renderDirectory();
-
-        };
-
-
-        function openWhatsappModal(id = null) {
-
-            document.getElementById('waId').value = id || '';
-
-            if(id) {
-
-                const wa = whatsappGroups.find(w => w.id === id);
-
-                document.getElementById('waName').value = wa.name;
-
-                document.getElementById('waUrl').value = wa.url;
-
-            } else {
-
-                document.getElementById('waName').value = '';
-
-                document.getElementById('waUrl').value = '';
-
-            }
-
-            document.getElementById('whatsappModal').classList.add('modal-active');
-
-        }
-
-        function closeWhatsappModal() { document.getElementById('whatsappModal').classList.remove('modal-active'); }
-
-        document.getElementById('waForm').onsubmit = (e) => {
-
-            e.preventDefault();
-
-            const id = document.getElementById('waId').value;
-
-            const data = {id: id ? parseInt(id) : Date.now(), name: document.getElementById('waName').value, url: document.getElementById('waUrl').value};
-
-            if(id) whatsappGroups = whatsappGroups.map(w => w.id === parseInt(id) ? data : w);
-
-            else whatsappGroups.push(data);
-
-            closeWhatsappModal(); renderDirectory();
-
-        };
-
-
-        window.onload = () => switchView('table');
-
-    </script>
-
+      }
+
+      document.getElementById('eventModal').classList.add('modal-active');
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').classList.remove('modal-active');
+    }
+
+    document.getElementById('eventForm').onsubmit = async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('eventId').value;
+      const a1 = document.getElementById('fAssignee1').value.trim();
+      const a2 = document.getElementById('fAssignee2').value.trim();
+
+      // Keep existing status when editing
+      const old = id ? events.find(ev => String(ev.id) === String(id)) : null;
+
+      const data = {
+        id: id || undefined,
+        name: document.getElementById('fName').value,
+        priority: document.getElementById('fPriority').value,
+        owner: document.getElementById('fOwner').value,
+        assignee1: a1,
+        assignee2: a2,
+        location: document.getElementById('fLoc').value,
+        start: document.getElementById('fStart').value,
+        end: document.getElementById('fEnd').value,
+        link: document.getElementById('fLink').value,
+        status: old?.status || 'لم تبدأ'
+      };
+
+      try {
+        await upsertEvent(data);
+        closeModal();
+      } catch (err) {
+        console.error('Save Event Error:', err);
+        alert('حدث خطأ أثناء حفظ الحدث. راجع Console للتفاصيل.');
+      }
+    };
+
+    function editEvent(id) { openModal(id); }
+
+    async function deleteEvent(id) {
+      if (!confirm('حذف الحدث؟')) return;
+      try {
+        await removeEvent(id);
+      } catch (err) {
+        console.error('Delete Event Error:', err);
+        alert('حدث خطأ أثناء حذف الحدث.');
+      }
+    }
+
+    // Modal: Entity
+    function openEntityModal(id = null) {
+      document.getElementById('entId').value = id || '';
+      if (id) {
+        const ent = entities.find(x => String(x.id) === String(id));
+        document.getElementById('entName').value = ent?.name || '';
+        document.getElementById('entUrl').value = ent?.url || '';
+        document.getElementById('entCat').value = ent?.category || 'supervisory';
+      } else {
+        document.getElementById('entName').value = '';
+        document.getElementById('entUrl').value = '';
+        document.getElementById('entCat').value = 'supervisory';
+      }
+      document.getElementById('entityModal').classList.add('modal-active');
+    }
+
+    function closeEntityModal() {
+      document.getElementById('entityModal').classList.remove('modal-active');
+    }
+
+    document.getElementById('entityForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('entId').value;
+
+      const data = {
+        id: id || undefined,
+        name: document.getElementById('entName').value,
+        url: document.getElementById('entUrl').value,
+        category: document.getElementById('entCat').value
+      };
+
+      try {
+        await upsertEntity(data);
+        closeEntityModal();
+      } catch (err) {
+        console.error('Save Entity Error:', err);
+        alert('حدث خطأ أثناء حفظ الجهة.');
+      }
+    };
+
+    function editEntity(id) { openEntityModal(id); }
+
+    async function deleteEntity(id) {
+      if (!confirm('حذف الجهة؟')) return;
+      try {
+        await removeEntity(id);
+      } catch (err) {
+        console.error('Delete Entity Error:', err);
+        alert('حدث خطأ أثناء حذف الجهة.');
+      }
+    }
+
+    // Modal: WhatsApp
+    function openWhatsappModal(id = null) {
+      document.getElementById('waId').value = id || '';
+
+      if (id) {
+        const wa = whatsappGroups.find(w => String(w.id) === String(id));
+        document.getElementById('waName').value = wa?.name || '';
+        document.getElementById('waUrl').value = wa?.url || '';
+      } else {
+        document.getElementById('waName').value = '';
+        document.getElementById('waUrl').value = '';
+      }
+
+      document.getElementById('whatsappModal').classList.add('modal-active');
+    }
+
+    function closeWhatsappModal() {
+      document.getElementById('whatsappModal').classList.remove('modal-active');
+    }
+
+    document.getElementById('waForm').onsubmit = async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('waId').value;
+      const data = {
+        id: id || undefined,
+        name: document.getElementById('waName').value,
+        url: document.getElementById('waUrl').value
+      };
+
+      try {
+        await upsertWhatsapp(data);
+        closeWhatsappModal();
+      } catch (err) {
+        console.error('Save WhatsApp Error:', err);
+        alert('حدث خطأ أثناء حفظ المجموعة.');
+      }
+    };
+
+    async function deleteWhatsappGroup(id) {
+      if (!confirm('حذف مجموعة الواتساب؟')) return;
+      try {
+        await removeWhatsapp(id);
+      } catch (err) {
+        console.error('Delete WhatsApp Error:', err);
+        alert('حدث خطأ أثناء حذف مجموعة الواتساب.');
+      }
+    }
+
+    // Init
+    window.onload = async () => {
+      await loadData();
+      switchView('table');
+    };
+  </script>
 </body>
-
 </html>
