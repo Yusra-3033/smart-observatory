@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>منصة المرصد الذكي</title>
 
-  <!-- Favicon / Logo -->
   <link rel="icon" href="/logo.png" type="image/png" />
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,10 +12,8 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;900&display=swap');
-
     body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f0f7ff; }
 
-    /* keep palette consistent */
     :root{
       --primary:#1e40af;
       --bg:#f0f7ff;
@@ -49,13 +46,15 @@
       font-weight: 900 !important;
     }
 
-    /* prevent iOS zoom on form controls */
     input, select, textarea { font-size: 16px; }
 
-    /* consistent icon sizing */
     .icon-18 { font-size: 18px; }
     .icon-20 { font-size: 20px; }
     .icon-22 { font-size: 22px; }
+
+    /* Sortable header UX */
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: rgba(255,255,255,0.10); }
   </style>
 </head>
 
@@ -100,7 +99,7 @@
 
   <main class="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-8 py-4 md:py-8">
 
-    <!-- Hero / Banner -->
+    <!-- Hero -->
     <section class="bg-blue-50 p-8 md:p-12 text-center rounded-3xl mb-6 md:mb-8 border border-blue-100 shadow-sm">
       <h2 class="text-3xl md:text-4xl font-black text-blue-900 mb-3 md:mb-4">المرصد الذكي</h2>
       <p class="text-base md:text-lg text-blue-700 mb-5 md:mb-6 font-medium">
@@ -112,7 +111,7 @@
       </button>
     </section>
 
-    <!-- View Controls -->
+    <!-- Controls row -->
     <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center mb-6 md:mb-8 gap-4">
 
       <div class="flex bg-white rounded-2xl p-1.5 border-2 border-blue-50 shadow-sm overflow-x-auto max-w-full" id="tabsContainer">
@@ -128,6 +127,24 @@
                 class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
           <i class="fa-solid fa-sitemap icon-18"></i> <span>دليل الجهات والمجموعات</span>
         </button>
+      </div>
+
+      <!-- Optional mobile sort controls for table view -->
+      <div id="tableSortControls" class="flex md:hidden items-center gap-3 bg-white px-4 py-3 rounded-2xl border-2 border-blue-50 shadow-sm">
+        <div class="text-sm font-black text-blue-900 whitespace-nowrap">
+          <i class="fa-solid fa-arrow-up-wide-short icon-18 text-blue-700"></i> فرز
+        </div>
+        <select id="mobileSortSelect" class="w-full border p-2.5 rounded-2xl outline-none">
+          <option value="start:desc">التاريخ (الأحدث)</option>
+          <option value="start:asc">التاريخ (الأقدم)</option>
+          <option value="name:asc">الحدث (أ-ي)</option>
+          <option value="name:desc">الحدث (ي-أ)</option>
+          <option value="owner:asc">المالك (أ-ي)</option>
+          <option value="owner:desc">المالك (ي-أ)</option>
+          <option value="priority:desc">الأولوية (عالي أولاً)</option>
+          <option value="priority:asc">الأولوية (منخفض أولاً)</option>
+          <option value="status:asc">الحالة</option>
+        </select>
       </div>
 
       <div id="calendarControls" class="hidden items-center justify-between gap-4 bg-white px-4 py-2.5 rounded-2xl border-2 border-blue-50 shadow-sm">
@@ -162,13 +179,48 @@
           <table class="w-full text-sm">
             <thead class="bg-blue-700 text-white">
               <tr>
-                <th class="px-6 py-5 text-right font-black">الحدث</th>
-                <th class="px-4 py-5 text-right font-black">الأولوية</th>
-                <th class="px-4 py-5 text-right font-black">المالك</th>
-                <th class="px-4 py-5 text-right font-black">المسند إليه</th>
-                <th class="px-4 py-5 text-right font-black">الموقع</th>
-                <th class="px-4 py-5 text-right font-black">التاريخ</th>
-                <th class="px-4 py-5 text-right font-black">الحالة</th>
+                <th class="px-6 py-5 text-right font-black sortable" data-key="name">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>الحدث</span>
+                    <span class="sort-indicator opacity-90" data-key="name"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="priority">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>الأولوية</span>
+                    <span class="sort-indicator opacity-90" data-key="priority"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="owner">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>المالك</span>
+                    <span class="sort-indicator opacity-90" data-key="owner"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="assignees">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>المسند إليه</span>
+                    <span class="sort-indicator opacity-90" data-key="assignees"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="location">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>الموقع</span>
+                    <span class="sort-indicator opacity-90" data-key="location"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="start">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>التاريخ</span>
+                    <span class="sort-indicator opacity-90" data-key="start"></span>
+                  </div>
+                </th>
+                <th class="px-4 py-5 text-right font-black sortable" data-key="status">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>الحالة</span>
+                    <span class="sort-indicator opacity-90" data-key="status"></span>
+                  </div>
+                </th>
                 <th class="px-6 py-5 text-center font-black">إجراءات</th>
               </tr>
             </thead>
@@ -180,10 +232,8 @@
 
       <!-- Calendar View -->
       <div id="calendarView" class="hidden glass-card rounded-3xl shadow-lg overflow-hidden border-0">
-        <!-- Mobile agenda -->
         <div id="calendarAgenda" class="md:hidden p-4 sm:p-6 space-y-3 bg-white"></div>
 
-        <!-- Desktop grid -->
         <div class="hidden md:block">
           <div class="calendar-grid bg-blue-50/50 text-center text-xs font-black text-blue-800">
             <div class="py-4">الأحد</div><div class="py-4">الاثنين</div><div class="py-4">الثلاثاء</div><div class="py-4">الأربعاء</div><div class="py-4">الخميس</div><div class="py-4 text-red-500">الجمعة</div><div class="py-4">السبت</div>
@@ -194,7 +244,6 @@
 
       <!-- Directory View -->
       <div id="directoryView" class="hidden space-y-8">
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
           <div class="glass-card rounded-3xl p-8 hover:scale-[1.01] transition-all duration-200 shadow-lg">
@@ -237,7 +286,7 @@
     </div>
   </main>
 
-  <!-- Modal: Event -->
+  <!-- Modals (same as your current) -->
   <div id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
     <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto">
@@ -308,7 +357,6 @@
     </div>
   </div>
 
-  <!-- Modal: Entity -->
   <div id="entityModal" role="dialog" aria-modal="true" aria-labelledby="entityModalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 sm:p-10">
@@ -337,7 +385,6 @@
     </div>
   </div>
 
-  <!-- Modal: WhatsApp -->
   <div id="whatsappModal" role="dialog" aria-modal="true" aria-labelledby="waModalTitle"
        class="fixed inset-0 z-50 hidden items-center justify-center bg-blue-900/40 backdrop-blur-sm p-3 sm:p-4">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 sm:p-10">
@@ -375,6 +422,9 @@
     let currentView = 'table';
     let viewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
+    // Sorting state
+    let sortState = { key: 'start', dir: 'desc' }; // default: newest first
+
     function safeLower(v) { return (v || '').toString().toLowerCase(); }
 
     function getGoogleCalendarLink(ev) {
@@ -391,10 +441,25 @@
       return 'bg-green-100 text-green-700 border-green-200';
     }
 
+    // Rank priorities for sorting
+    function priorityRank(p) {
+      if ((p || '').includes('عالي')) return 3;
+      if ((p || '').includes('متوسط')) return 2;
+      return 1; // منخفض
+    }
+
     function getStatusClass(s) {
       if (s === 'مكتملة') return 'bg-green-600 text-white';
       if (s === 'قيد التنفيذ') return 'bg-blue-500 text-white';
       return 'bg-slate-200 text-slate-700';
+    }
+
+    // Rank statuses for sorting (customize order here)
+    function statusRank(s) {
+      if (s === 'قيد التنفيذ') return 3;
+      if (s === 'لم تبدأ') return 2;
+      if (s === 'مكتملة') return 1;
+      return 0;
     }
 
     function formatAssignees(ev) {
@@ -444,11 +509,79 @@
       render();
     }
 
+    // ---------- Sorting helpers ----------
+    function compareValues(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+
+    function getSortValue(ev, key) {
+      switch(key) {
+        case 'name': return (ev.name || '').toString().trim();
+        case 'owner': return (ev.owner || '').toString().trim();
+        case 'location': return (ev.location || '').toString().trim();
+        case 'start': return (ev.start || '').toString().trim(); // YYYY-MM-DD sorts lexicographically
+        case 'priority': return priorityRank(ev.priority);
+        case 'status': return statusRank(ev.status);
+        case 'assignees': return formatAssignees(ev);
+        default: return (ev[key] || '').toString().trim();
+      }
+    }
+
+    function getSortedEvents(list) {
+      const { key, dir } = sortState;
+      const sign = dir === 'asc' ? 1 : -1;
+
+      return [...list].sort((e1, e2) => {
+        const v1 = getSortValue(e1, key);
+        const v2 = getSortValue(e2, key);
+
+        // numeric vs string
+        if (typeof v1 === 'number' && typeof v2 === 'number') {
+          if (v1 !== v2) return (v1 - v2) * sign;
+        } else {
+          const c = compareValues(String(v1).toLocaleLowerCase(), String(v2).toLocaleLowerCase());
+          if (c !== 0) return c * sign;
+        }
+
+        // stable tie-breaker: date desc then name
+        const t = compareValues((e1.start || ''), (e2.start || '')) * -1;
+        if (t !== 0) return t;
+        return compareValues((e1.name || ''), (e2.name || ''));
+      });
+    }
+
+    function setSort(key) {
+      if (sortState.key === key) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.key = key;
+        // sensible defaults per column
+        sortState.dir = (key === 'start' || key === 'priority') ? 'desc' : 'asc';
+      }
+      updateSortIndicators();
+      renderTable();
+      renderCards();
+      applySearchFilter();
+    }
+
+    function updateSortIndicators() {
+      // Clear all
+      document.querySelectorAll('.sort-indicator').forEach(el => el.textContent = '');
+
+      const indicator = document.querySelector(`.sort-indicator[data-key="${sortState.key}"]`);
+      if (!indicator) return;
+
+      indicator.innerHTML = sortState.dir === 'asc'
+        ? '<i class="fa-solid fa-arrow-up icon-18"></i>'
+        : '<i class="fa-solid fa-arrow-down icon-18"></i>';
+    }
+    // -----------------------------------
+
     function renderTable() {
       const tbody = document.getElementById('eventsTableBody');
       if (!tbody) return;
 
-      tbody.innerHTML = events.map(ev => `
+      const sorted = getSortedEvents(events);
+
+      tbody.innerHTML = sorted.map(ev => `
         <tr class="hover:bg-blue-50/50 transition-all duration-200 event-row"
             data-name="${safeLower(ev.name)}"
             data-owner="${safeLower(ev.owner)}">
@@ -498,7 +631,9 @@
       const wrap = document.getElementById('eventsCards');
       if (!wrap) return;
 
-      wrap.innerHTML = events.map(ev => `
+      const sorted = getSortedEvents(events);
+
+      wrap.innerHTML = sorted.map(ev => `
         <div class="bg-white rounded-3xl border border-blue-50 shadow-lg p-5 sm:p-6 space-y-3 event-card hover:scale-[1.01] transition-all duration-200"
              data-name="${safeLower(ev.name)}"
              data-owner="${safeLower(ev.owner)}">
@@ -663,6 +798,7 @@
     }
 
     function render() {
+      updateSortIndicators();
       renderTable();
       renderCards();
       renderCalendar();
@@ -677,10 +813,14 @@
       document.getElementById('calendarView').classList.toggle('hidden', view !== 'calendar');
       document.getElementById('directoryView').classList.toggle('hidden', view !== 'directory');
 
+      // Show/hide controls
       document.getElementById('calendarControls').classList.toggle('hidden', view !== 'calendar');
       document.getElementById('calendarControls').classList.toggle('flex', view === 'calendar');
 
       document.getElementById('directoryControls').classList.toggle('hidden', view !== 'directory');
+
+      // Mobile sort controls only in table view
+      document.getElementById('tableSortControls').classList.toggle('hidden', view !== 'table');
 
       document.querySelectorAll('#tabsContainer button').forEach(btn => btn.classList.remove('tab-active'));
       document.getElementById(`${view}Btn`).classList.add('tab-active');
@@ -711,6 +851,24 @@
 
     document.getElementById('searchInput').addEventListener('input', applySearchFilter);
 
+    // Hook up desktop header sorting
+    function bindSortableHeaders() {
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => setSort(th.getAttribute('data-key')));
+      });
+    }
+
+    // Hook up mobile sort select
+    document.getElementById('mobileSortSelect').addEventListener('change', (e) => {
+      const [key, dir] = e.target.value.split(':');
+      sortState = { key, dir };
+      updateSortIndicators();
+      renderTable();
+      renderCards();
+      applySearchFilter();
+    });
+
+    // Supabase Mutations: Events
     async function updateStatus(id, newStatus) {
       events = events.map(e => (String(e.id) === String(id) ? { ...e, status: newStatus } : e));
       renderTable(); renderCards(); renderCalendar();
@@ -724,7 +882,6 @@
 
     async function upsertEvent(data) {
       const isNew = !data.id;
-
       const payload = {
         name: data.name,
         priority: data.priority,
@@ -751,6 +908,7 @@
       await loadData();
     }
 
+    // Entities
     async function upsertEntity(data) {
       const isNew = !data.id;
       const payload = { name: data.name, url: data.url, category: data.category };
@@ -768,6 +926,7 @@
       await loadData();
     }
 
+    // WhatsApp groups
     async function upsertWhatsapp(data) {
       const isNew = !data.id;
       const payload = { name: data.name, url: data.url };
@@ -785,6 +944,7 @@
       await loadData();
     }
 
+    // Modal helpers
     let lastFocusEl = null;
 
     function showModal(modalId, focusId) {
@@ -819,6 +979,7 @@
       });
     });
 
+    // Event modal
     function openModal(id = null) {
       const f = document.getElementById('eventForm');
       f.reset();
@@ -880,6 +1041,7 @@
       catch (err) { console.error('Delete Event Error:', err); alert('حدث خطأ أثناء حذف الحدث.'); }
     }
 
+    // Entity modal
     function openEntityModal(id = null) {
       document.getElementById('entId').value = id || '';
 
@@ -924,6 +1086,7 @@
       catch (err) { console.error('Delete Entity Error:', err); alert('حدث خطأ أثناء حذف الجهة.'); }
     }
 
+    // WhatsApp modal
     function openWhatsappModal(id = null) {
       document.getElementById('waId').value = id || '';
 
@@ -963,9 +1126,13 @@
       catch (err) { console.error('Delete WhatsApp Error:', err); alert('حدث خطأ أثناء حذف مجموعة الواتساب.'); }
     }
 
+    // Init
     window.onload = async () => {
       await loadData();
       switchView('table');
+      bindSortableHeaders();
+      updateSortIndicators();
+      document.getElementById('mobileSortSelect').value = `${sortState.key}:${sortState.dir}`;
     };
   </script>
 </body>
