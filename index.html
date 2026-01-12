@@ -276,7 +276,7 @@
     // IMPORTANT:
     // Use your Supabase project's anon key (NOT service role key) for frontend.
     const SUPABASE_URL = "https://hfwdocyrhiwspitmpvgg.supabase.co";
-    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmd2RvY3lyaGl3c3BpdG1wdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMjAxNTcsImV4cCI6MjA4Mzc5NjE1N30.or59DKhlc7UcY4EQh-TOcCc3lNILgMvU0KpR-lsCL5g";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -321,7 +321,6 @@
     }
 
     function normalizeEventRow(row) {
-      // Ensure your Supabase columns match these names.
       return {
         id: row.id,
         name: row.name || '',
@@ -331,11 +330,12 @@
         assignee2: row.assignee2 || '',
         location: row.location || '',
         status: row.status || 'لم تبدأ',
-        start: row.start || '',
-        end: row.end || row.start || '',
+        start: row.start_date || '',
+        end: row.end_date || row.start_date || '',
         link: row.link || ''
       };
     }
+
 
     function normalizeEntityRow(row) {
       return {
@@ -536,18 +536,36 @@
     }
 
     async function upsertEvent(data) {
-      // If you use UUID id in Supabase, keep id as string. If bigint identity, omit id for insert.
-      const payload = { ...data };
-
-      const isNew = !payload.id;
-      if (isNew) delete payload.id;
-
-      const { data: saved, error } = await supabaseClient.from('events').upsert(payload).select('*');
+      const isNew = !data.id;
+    
+      // Build payload safely
+      const payload = {
+        name: data.name,
+        priority: data.priority,
+        owner: data.owner,
+        assignee1: data.assignee1,
+        assignee2: data.assignee2,
+        location: data.location,
+        start_date: data.start,   // match DB column
+        end_date: data.end,       // match DB column
+        status: data.status,
+        link: data.link
+      };
+    
+      // Only include id when editing
+      if (!isNew) {
+        payload.id = data.id;
+      }
+    
+      const { error } = await supabaseClient
+        .from('events')
+        .upsert(payload);
+    
       if (error) throw error;
-
+    
       await loadData();
-      return saved;
     }
+
 
     async function removeEvent(id) {
       const { error } = await supabaseClient.from('events').delete().eq('id', id);
@@ -557,14 +575,27 @@
 
     // Supabase Mutations: Entities
     async function upsertEntity(data) {
-      const payload = { ...data };
-      const isNew = !payload.id;
-      if (isNew) delete payload.id;
-
-      const { error } = await supabaseClient.from('entities').upsert(payload);
+      const isNew = !data.id;
+    
+      const payload = {
+        name: data.name,
+        url: data.url,
+        category: data.category
+      };
+    
+      if (!isNew) {
+        payload.id = data.id;
+      }
+    
+      const { error } = await supabaseClient
+        .from('entities')
+        .upsert(payload);
+    
       if (error) throw error;
+    
       await loadData();
     }
+
 
     async function removeEntity(id) {
       const { error } = await supabaseClient.from('entities').delete().eq('id', id);
@@ -574,14 +605,26 @@
 
     // Supabase Mutations: WhatsApp groups
     async function upsertWhatsapp(data) {
-      const payload = { ...data };
-      const isNew = !payload.id;
-      if (isNew) delete payload.id;
-
-      const { error } = await supabaseClient.from('whatsapp_groups').upsert(payload);
+      const isNew = !data.id;
+    
+      const payload = {
+        name: data.name,
+        url: data.url
+      };
+    
+      if (!isNew) {
+        payload.id = data.id;
+      }
+    
+      const { error } = await supabaseClient
+        .from('whatsapp_groups')
+        .upsert(payload);
+    
       if (error) throw error;
+    
       await loadData();
     }
+
 
     async function removeWhatsapp(id) {
       const { error } = await supabaseClient.from('whatsapp_groups').delete().eq('id', id);
