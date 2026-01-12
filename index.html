@@ -355,20 +355,23 @@
       console.log('Loading data from Supabase...');
       
       const { data: eData, error: eErr } = await supabaseClient.from('events').select('*');
-
       console.log('Events data:', eData);
       console.log('Events error:', eErr);
-
+    
+      // Normalize events before storing
+      events = (eData || []).map(normalizeEventRow);
+    
       const { data: enData, error: enErr } = await supabaseClient.from('entities').select('*').order('id', { ascending: true });
       if (enErr) console.error('Entities Load Error:', enErr);
       entities = (enData || []).map(normalizeEntityRow);
-
+    
       const { data: wData, error: wErr } = await supabaseClient.from('whatsapp_groups').select('*').order('id', { ascending: true });
       if (wErr) console.error('WhatsApp Load Error:', wErr);
       whatsappGroups = (wData || []).map(normalizeWhatsappRow);
-
+    
       render();
     }
+
 
     // Render Functions
     function renderTable() {
