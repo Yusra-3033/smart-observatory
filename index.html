@@ -352,9 +352,12 @@
 
     // Supabase Data Load
     async function loadData() {
-      const { data: eData, error: eErr } = await supabaseClient.from('events').select('*').order('start_date', { ascending: true });
-      if (eErr) console.error('Events Load Error:', eErr);
-      events = (eData || []).map(normalizeEventRow);
+      console.log('Loading data from Supabase...');
+      
+      const { data: eData, error: eErr } = await supabaseClient.from('events').select('*');
+
+      console.log('Events data:', eData);
+      console.log('Events error:', eErr);
 
       const { data: enData, error: enErr } = await supabaseClient.from('entities').select('*').order('id', { ascending: true });
       if (enErr) console.error('Entities Load Error:', enErr);
