@@ -352,7 +352,7 @@
 
     // Supabase Data Load
     async function loadData() {
-      const { data: eData, error: eErr } = await supabaseClient.from('events').select('*').order('start', { ascending: true });
+      const { data: eData, error: eErr } = await supabaseClient.from('events').select('*').order('start_date', { ascending: true });
       if (eErr) console.error('Events Load Error:', eErr);
       events = (eData || []).map(normalizeEventRow);
 
