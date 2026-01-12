@@ -501,6 +501,15 @@
     </div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      const SUPABASE_URL = "https://hfwdocyrhiwspitmpvgg.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmd2RvY3lyaGl3c3BpdG1wdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMjAxNTcsImV4cCI6MjA4Mzc5NjE1N30.or59DKhlc7UcY4EQh-TOcCc3lNILgMvU0KpR-lsCL5g";
+    
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+
     <script>
 
         // Data Store
