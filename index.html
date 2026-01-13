@@ -197,7 +197,7 @@
                     <span class="sort-indicator opacity-90" data-key="location"></span>
                   </div>
                 </th>
-                <th class="px-4 py-5 text-right font-black sortable" data-key="start">
+                <th class="px-4 py-5 text-right font-black sortable w-[130px]" data-key="start">
                   <div class="flex items-center justify-between gap-2">
                     <span>التاريخ</span>
                     <span class="sort-indicator opacity-90" data-key="start"></span>
@@ -589,7 +589,7 @@
           <td class="px-4 py-5 font-semibold">${ev.owner || '-'}</td>
           <td class="px-4 py-5 font-semibold text-blue-700">${formatAssignees(ev)}</td>
           <td class="px-4 py-5 text-slate-600">${ev.location || 'غير محدد'}</td>
-          <td class="px-4 py-5 font-mono text-xs">${ev.start || '-'}</td>
+          <td class="px-4 py-5 font-mono text-xs whitespace-nowrap">${ev.start || '-'}</td>
 
           <td class="px-4 py-5">
             <select onchange="updateStatus('${ev.id}', this.value)"
