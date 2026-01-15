@@ -39,7 +39,7 @@
     .entity-link { transition: all 0.2s; border: 1px solid transparent; }
     .entity-link:hover { transform: translateY(-2px); border-color: var(--primary); background-color: var(--bg); }
 
-    .status-badge { padding: 6px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; border: 1px solid transparent; cursor: pointer; }
+    .status-badge { padding: 6px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; border: 1px solid transparent; cursor: default; }
     .priority-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; }
 
     .tab-active {
@@ -58,6 +58,32 @@
     /* Sortable header UX */
     th.sortable { cursor: pointer; user-select: none; }
     th.sortable:hover { background: rgba(255,255,255,0.10); }
+
+    /* Pie chart: smaller & centered */
+    .pie-wrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding: 6px 0 2px;
+    }
+    .pie-box{
+      width: 260px;
+      max-width: 90vw;
+    }
+    /* Highlight today in calendar */
+    .today-cell{
+      border: 2px solid rgba(30, 64, 175, 0.55) !important;
+      background: rgba(30, 64, 175, 0.06) !important;
+      box-shadow: inset 0 0 0 2px rgba(30, 64, 175, 0.10);
+    }
+    .today-pill{
+      background: rgba(30, 64, 175, 0.10);
+      color: #1e40af;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 900;
+      font-size: 11px;
+    }
   </style>
 </head>
 
@@ -149,9 +175,9 @@
           <div class="text-xs text-slate-500 font-bold">يعتمد على حقل: الموقع</div>
         </div>
 
-        <div class="w-full overflow-x-auto">
-          <div class="min-w-[320px]">
-            <canvas id="citiesPie" height="140"></canvas>
+        <div class="pie-wrap">
+          <div class="pie-box">
+            <canvas id="citiesPie" height="180"></canvas>
           </div>
         </div>
       </div>
@@ -189,7 +215,8 @@
           <option value="owner:desc">المالك (ي-أ)</option>
           <option value="priority:desc">الأولوية (عالي أولاً)</option>
           <option value="priority:asc">الأولوية (منخفض أولاً)</option>
-          <option value="status:asc">الحالة</option>
+          <option value="counter:asc">العدّاد (الأقرب أولاً)</option>
+          <option value="counter:desc">العدّاد (الأبعد أولاً)</option>
         </select>
       </div>
 
@@ -257,14 +284,17 @@
                 </th>
                 <th class="px-4 py-5 text-right font-black sortable w-[130px]" data-key="start">
                   <div class="flex items-center justify-between gap-2">
-                    <span>التاريخ</span>
+                    <span>تاريخ البدء</span>
                     <span class="sort-indicator opacity-90" data-key="start"></span>
                   </div>
                 </th>
-                <th class="px-4 py-5 text-right font-black sortable w-[140px]" data-key="status">
+
+                <!-- REMOVED: end date column header -->
+
+                <th class="px-4 py-5 text-right font-black sortable w-[170px]" data-key="counter">
                   <div class="flex items-center justify-between gap-2">
                     <span>العدّاد</span>
-                    <span class="sort-indicator opacity-90" data-key="status"></span>
+                    <span class="sort-indicator opacity-90" data-key="counter"></span>
                   </div>
                 </th>
                 <th class="px-6 py-5 text-center font-black">إجراءات</th>
@@ -273,7 +303,6 @@
             <tbody id="eventsTableBody" class="divide-y divide-blue-50"></tbody>
           </table>
         </div>
-        Z
       </div>
 
       <!-- Calendar View -->
@@ -490,25 +519,16 @@
       return 'bg-green-100 text-green-700 border-green-200';
     }
 
-    // Rank priorities for sorting
     function priorityRank(p) {
       if ((p || '').includes('عالي')) return 3;
       if ((p || '').includes('متوسط')) return 2;
-      return 1; // منخفض
+      return 1;
     }
 
     function getStatusClass(s) {
       if (s === 'مكتملة') return 'bg-green-600 text-white';
       if (s === 'قيد التنفيذ') return 'bg-blue-500 text-white';
       return 'bg-slate-200 text-slate-700';
-    }
-
-    // Rank statuses for sorting (kept for existing mobile sort option, though UI now shows countdown)
-    function statusRank(s) {
-      if (s === 'قيد التنفيذ') return 3;
-      if (s === 'لم تبدأ') return 2;
-      if (s === 'مكتملة') return 1;
-      return 0;
     }
 
     function formatAssignees(ev) {
@@ -527,7 +547,7 @@
         assignee1: row.assignee1 || '',
         assignee2: row.assignee2 || '',
         location: row.location || '',
-        status: row.status || 'لم تبدأ',
+        status: (row.status || 'لم تبدأ').trim(),
         start: row.start_date || '',
         end: row.end_date || row.start_date || '',
         link: row.link || ''
@@ -558,49 +578,84 @@
       render();
     }
 
-    // ---------- Countdown (replaces status UI) ----------
-    function daysUntil(dateStr) {
+    // -------------------- Counter (start/end based) --------------------
+    function parseDateYMD(dateStr) {
       if (!dateStr) return null;
       const [y, m, d] = dateStr.split('-').map(Number);
       if (!y || !m || !d) return null;
+      return new Date(y, m - 1, d);
+    }
 
-      const target = new Date(y, m - 1, d);
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    function startOfToday() {
+      const n = new Date();
+      return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+    }
 
-      const diffMs = target - today;
-      return Math.round(diffMs / (1000 * 60 * 60 * 24));
+    function dayDiff(fromDate, toDate) {
+      const ms = toDate - fromDate;
+      return Math.round(ms / (1000 * 60 * 60 * 24));
+    }
+
+    function getCounterState(ev) {
+      if (ev.status === 'مكتملة') return { type: 'done', daysToStart: null };
+
+      const today = startOfToday();
+      const s = parseDateYMD(ev.start);
+      const e = parseDateYMD(ev.end || ev.start);
+
+      if (!s || !e) return { type: 'unknown', daysToStart: null };
+
+      if (today > e) return { type: 'ended', daysToStart: dayDiff(today, s) };
+      if (today >= s && today <= e) return { type: 'running', daysToStart: 0 };
+      return { type: 'upcoming', daysToStart: dayDiff(today, s) };
     }
 
     function getCountdownBadge(ev) {
-      if (ev.status === 'مكتملة') {
-        return `<span class="status-badge bg-green-600 text-white cursor-default">مكتملة</span>`;
-      }
+      const st = getCounterState(ev);
 
-      const diff = daysUntil(ev.start);
-      if (diff === null) {
-        return `<span class="status-badge bg-slate-200 text-slate-700 cursor-default">غير محدد</span>`;
+      // مكتملة → أخضر
+      if (st.type === 'done') {
+        return `<span class="status-badge bg-green-600 text-white">مكتملة</span>`;
       }
-
-      if (diff === 0) {
-        return `<span class="status-badge bg-blue-600 text-white cursor-default">اليوم</span>`;
+      // قيد التنفيذ → أصفر / برتقالي
+      if (st.type === 'running') {
+        return `<span class="status-badge bg-amber-500 text-white">قيد التنفيذ</span>`;
       }
-      if (diff > 0) {
-        return `<span class="status-badge bg-orange-100 text-orange-700 border border-orange-200 cursor-default">متبقي ${diff} يوم</span>`;
+      // انتهى → أخضر
+      if (st.type === 'ended') {
+        return `<span class="status-badge bg-green-600 text-white">انتهى</span>`;
       }
-      return `<span class="status-badge bg-slate-200 text-slate-700 cursor-default">منتهي</span>`;
+      // متبقي X يوم → أزرق
+      if (st.type === 'upcoming') {
+        return `<span class="status-badge bg-blue-600 text-white">متبقي ${st.daysToStart} يوم</span>`;
+      }
+      return `<span class="status-badge bg-slate-200 text-slate-700">غير محدد</span>`;
     }
-    // -----------------------------------
+
+    function counterSortValue(ev) {
+      const st = getCounterState(ev);
+      if (st.type === 'running') return -100000;
+      if (st.type === 'upcoming') return st.daysToStart ?? 99999;
+      if (st.type === 'ended') return 100000 + Math.abs(st.daysToStart ?? 0);
+      if (st.type === 'done') return 200000;
+      return 300000;
+    }
+    // ------------------------------------------------------------------
 
     // ---------- Dashboard ----------
     function getCityLabel(ev) {
       const loc = (ev.location || '').trim();
       return loc ? loc : 'غير محدد';
     }
-
+    function isEndedByDate(ev){
+      const today = new Date();
+      const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const e = parseDateYMD(ev.end || ev.start);
+      return e && t > e;
+    }
     function updateDashboard() {
       const total = events.length;
-      const done = events.filter(e => e.status === 'مكتملة').length;
+      const done = events.filter(e => (e.status || '').trim() === 'مكتملة' || isEndedByDate(e)).length;
       const open = total - done;
 
       const totalEl = document.getElementById('kpiTotal');
@@ -630,14 +685,12 @@
 
       citiesPieChart = new Chart(canvas, {
         type: 'pie',
-        data: {
-          labels,
-          datasets: [{ data }]
-        },
+        data: { labels, datasets: [{ data }] },
         options: {
           responsive: true,
+          maintainAspectRatio: true,
           plugins: {
-            legend: { position: 'bottom', rtl: true, labels: { boxWidth: 12 } },
+            legend: { position: 'bottom', rtl: true, labels: { boxWidth: 10 } },
             tooltip: { rtl: true }
           }
         }
@@ -653,10 +706,10 @@
         case 'name': return (ev.name || '').toString().trim();
         case 'owner': return (ev.owner || '').toString().trim();
         case 'location': return (ev.location || '').toString().trim();
-        case 'start': return (ev.start || '').toString().trim(); // YYYY-MM-DD sorts lexicographically
+        case 'start': return (ev.start || '').toString().trim();
         case 'priority': return priorityRank(ev.priority);
-        case 'status': return statusRank(ev.status);
         case 'assignees': return formatAssignees(ev);
+        case 'counter': return counterSortValue(ev);
         default: return (ev[key] || '').toString().trim();
       }
     }
@@ -683,24 +736,27 @@
     }
 
     function setSort(key) {
+      if (key === 'end') return; // just in case
       if (sortState.key === key) {
         sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
       } else {
         sortState.key = key;
         sortState.dir = (key === 'start' || key === 'priority') ? 'desc' : 'asc';
+        if (key === 'counter') sortState.dir = 'asc';
       }
       updateSortIndicators();
       renderTable();
       renderCards();
       applySearchFilter();
+
+      const ms = document.getElementById('mobileSortSelect');
+      if (ms) ms.value = `${sortState.key}:${sortState.dir}`;
     }
 
     function updateSortIndicators() {
       document.querySelectorAll('.sort-indicator').forEach(el => el.textContent = '');
-
       const indicator = document.querySelector(`.sort-indicator[data-key="${sortState.key}"]`);
       if (!indicator) return;
-
       indicator.innerHTML = sortState.dir === 'asc'
         ? '<i class="fa-solid fa-arrow-up icon-18"></i>'
         : '<i class="fa-solid fa-arrow-down icon-18"></i>';
@@ -734,6 +790,8 @@
           <td class="px-4 py-5 font-semibold text-blue-700">${formatAssignees(ev)}</td>
           <td class="px-4 py-5 text-slate-600">${ev.location || 'غير محدد'}</td>
           <td class="px-4 py-5 font-mono text-xs whitespace-nowrap">${ev.start || '-'}</td>
+
+          <!-- REMOVED: end date cell -->
 
           <td class="px-4 py-5">
             ${getCountdownBadge(ev)}
@@ -869,13 +927,22 @@
         grid.innerHTML += `<div class="h-28 bg-gray-50/50 border border-blue-50/20"></div>`;
       }
 
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const dayEvents = events.filter(e => e.start === dateStr);
 
+        const isToday = dateStr === todayStr;
+
         grid.innerHTML += `
-          <div class="h-28 border border-blue-50 p-2">
-            <span class="text-xs font-black text-slate-300">${d}</span>
+          <div class="h-28 border border-blue-50 p-2 ${isToday ? 'today-cell' : ''}">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black ${isToday ? 'today-pill' : 'text-slate-300'}">${d}</span>
+              ${isToday ? `<span class="today-pill">اليوم</span>` : ``}
+            </div>
+
             ${dayEvents.map(e => `
               <div class="text-[10px] text-white p-1.5 rounded-xl mt-1 truncate ${getStatusClass(e.status)}" title="${e.name}">
                 ${e.name}
@@ -884,6 +951,7 @@
           </div>
         `;
       }
+
     }
 
     function renderDirectory() {
@@ -944,13 +1012,11 @@
       document.getElementById('calendarView').classList.toggle('hidden', view !== 'calendar');
       document.getElementById('directoryView').classList.toggle('hidden', view !== 'directory');
 
-      // Show/hide controls
       document.getElementById('calendarControls').classList.toggle('hidden', view !== 'calendar');
       document.getElementById('calendarControls').classList.toggle('flex', view === 'calendar');
 
       document.getElementById('directoryControls').classList.toggle('hidden', view !== 'directory');
 
-      // Mobile sort controls only in table view
       document.getElementById('tableSortControls').classList.toggle('hidden', view !== 'table');
 
       document.querySelectorAll('#tabsContainer button').forEach(btn => btn.classList.remove('tab-active'));
@@ -982,14 +1048,12 @@
 
     document.getElementById('searchInput').addEventListener('input', applySearchFilter);
 
-    // Hook up desktop header sorting
     function bindSortableHeaders() {
       document.querySelectorAll('th.sortable').forEach(th => {
         th.addEventListener('click', () => setSort(th.getAttribute('data-key')));
       });
     }
 
-    // Hook up mobile sort select
     document.getElementById('mobileSortSelect').addEventListener('change', (e) => {
       const [key, dir] = e.target.value.split(':');
       sortState = { key, dir };
@@ -999,7 +1063,7 @@
       applySearchFilter();
     });
 
-    // Supabase Mutations: Events (kept as-is for edit/save; status is still stored but no longer edited via dropdown)
+    // -------------------- Supabase Mutations --------------------
     async function updateStatus(id, newStatus) {
       events = events.map(e => (String(e.id) === String(id) ? { ...e, status: newStatus } : e));
       renderTable(); renderCards(); renderCalendar(); updateDashboard();
@@ -1039,7 +1103,6 @@
       await loadData();
     }
 
-    // Entities
     async function upsertEntity(data) {
       const isNew = !data.id;
       const payload = { name: data.name, url: data.url, category: data.category };
@@ -1057,7 +1120,6 @@
       await loadData();
     }
 
-    // WhatsApp groups
     async function upsertWhatsapp(data) {
       const isNew = !data.id;
       const payload = { name: data.name, url: data.url };
@@ -1075,7 +1137,7 @@
       await loadData();
     }
 
-    // Modal helpers
+    // -------------------- Modal helpers --------------------
     let lastFocusEl = null;
 
     function showModal(modalId, focusId) {
@@ -1110,7 +1172,6 @@
       });
     });
 
-    // Event modal
     function openModal(id = null) {
       const f = document.getElementById('eventForm');
       f.reset();
@@ -1172,7 +1233,6 @@
       catch (err) { console.error('Delete Event Error:', err); alert('حدث خطأ أثناء حذف الحدث.'); }
     }
 
-    // Entity modal
     function openEntityModal(id = null) {
       document.getElementById('entId').value = id || '';
 
@@ -1217,7 +1277,6 @@
       catch (err) { console.error('Delete Entity Error:', err); alert('حدث خطأ أثناء حذف الجهة.'); }
     }
 
-    // WhatsApp modal
     function openWhatsappModal(id = null) {
       document.getElementById('waId').value = id || '';
 
