@@ -16,50 +16,81 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;900&display=swap');
     body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f0f7ff; }
-
     :root{
       --primary:#1e40af;
       --bg:#f0f7ff;
       --accent:#22c55e;
     }
-
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
     .modal-active { display: flex !important; }
-
     .glass-card {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(30,64,175,0.10);
     }
-
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
     .entity-link { transition: all 0.2s; border: 1px solid transparent; }
     .entity-link:hover { transform: translateY(-2px); border-color: var(--primary); background-color: var(--bg); }
-
     .status-badge { padding: 6px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; border: 1px solid transparent; cursor: default; }
     .priority-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; }
-
     .tab-active {
       background-color: var(--primary) !important;
       color: white !important;
       box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
       font-weight: 900 !important;
     }
-
     input, select, textarea { font-size: 16px; }
-
     .icon-18 { font-size: 18px; }
     .icon-20 { font-size: 20px; }
     .icon-22 { font-size: 22px; }
-
     /* Sortable header UX */
     th.sortable { cursor: pointer; user-select: none; }
     th.sortable:hover { background: rgba(255,255,255,0.10); }
-
     /* Pie chart: smaller & centered */
+    #analyticsView .glass-card{
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Make the chart area take the remaining height */
+    #analyticsView .chart-fill{
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    #analyticsView .grid {
+      gap: 24px; /* same spacing everywhere */
+    }
+    /* Donut + legend row */
+    .donut-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    /* Donut fixed size */
+    .donut-canvas {
+      width: 240px;
+      max-width: 55%;
+    }
+    /* Legend column */
+    .donut-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    /* Mobile fallback */
+    @media (max-width: 1024px) {
+      .donut-row {
+        flex-direction: column;
+      }
+      .donut-canvas {
+        width: 260px;
+        margin: 0 auto;
+      }
+    }
     .pie-wrap{
       display:flex;
       justify-content:center;
@@ -83,6 +114,87 @@
       border-radius: 9999px;
       font-weight: 900;
       font-size: 11px;
+    }
+    .pie-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+    }
+    .pie-legend{
+      width: 190px;
+      max-width: 45%;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 0;
+      border-bottom:1px solid rgba(30,64,175,0.08);
+    }
+    .event-chip{
+      color:#fff;
+      padding:6px 8px;
+      border-radius:12px;
+      margin-top:6px;
+      font-weight:800;
+      font-size:11px;
+      line-height:1.1;
+      box-shadow: 0 10px 18px rgba(2,6,23,.10);
+      border: 1px solid rgba(255,255,255,.55);
+    }
+    .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .legend-dot{ width:10px;height:10px;border-radius:9999px;flex:0 0 auto; }
+    .legend-label{
+      font-weight:800;font-size:13px;color:#334155;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width: 220px;
+    }
+    .legend-val{ font-weight:900;font-size:12px;color:#64748b;flex:0 0 auto; }
+    #citiesDonut, #eventsPerMonthBar{
+      max-height: 260px;
+    } 
+    /* Make the bar chart not feel too wide inside its 2-col card */
+    .bar-wrap{
+      width: 100%;
+      max-width: 720px;   /* adjust: 640 / 700 / 760 */
+      margin: 0 auto;     /* center inside the card */
+    }
+    /* ensure the canvas uses the wrapper width */
+    .bar-wrap canvas{
+      width: 100% !important;
+    }
+    /* KPI cards (Analytics top row) */
+    .kpi-card{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;     /* center horizontally */
+      text-align:center;      /* center text */
+      min-height: 160px;      /* taller boxes */
+      padding-top: 28px;
+      padding-bottom: 28px;
+    }
+    .kpi-label{
+      color:#64748b;
+      font-weight:800;
+      font-size:13px;
+    }
+    .kpi-value{
+      margin-top: 10px;
+      font-weight:900;
+      font-size: 44px;
+      line-height: 1;
+      color:#0f172a;
+    }
+    @media (max-width: 1024px){
+      .pie-row{ flex-direction:column; }
+      .pie-legend{ width:100%; max-width:100%; }
+      .legend-label{ max-width: 100%; }
     }
   </style>
 </head>
@@ -127,66 +239,14 @@
   </header>
 
   <main class="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-8 py-4 md:py-8">
-
-    <!-- Dashboard -->
-    <section id="dashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 md:mb-8">
-      <div class="glass-card rounded-3xl p-6 shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-blue-600 font-bold">إجمالي الأحداث</div>
-            <div id="kpiTotal" class="text-3xl font-black text-blue-900 mt-1">0</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-blue-700 text-white flex items-center justify-center shadow-lg">
-            <i class="fa-solid fa-layer-group icon-22"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-3xl p-6 shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-green-700 font-bold">الأحداث المكتملة</div>
-            <div id="kpiDone" class="text-3xl font-black text-green-800 mt-1">0</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-green-600 text-white flex items-center justify-center shadow-lg">
-            <i class="fa-solid fa-circle-check icon-22"></i>
-          </div>
-        </div>
-      </div>
       
-      <div class="glass-card rounded-3xl p-6 shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-slate-600 font-bold">الأحداث غير المكتملة</div>
-            <div id="kpiOpen" class="text-3xl font-black text-slate-800 mt-1">0</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-slate-700 text-white flex items-center justify-center shadow-lg">
-            <i class="fa-solid fa-hourglass-half icon-22"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-3xl p-6 shadow-lg lg:col-span-3">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-black text-blue-900 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-blue-700 icon-18"></i>
-            توزيع الأحداث حسب المدينة/الموقع
-          </h3>
-          <div class="text-xs text-slate-500 font-bold">يعتمد على حقل: الموقع</div>
-        </div>
-
-        <div class="pie-wrap">
-          <div class="pie-box">
-            <canvas id="citiesPie" height="200"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Controls row -->
     <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center mb-6 md:mb-8 gap-4">
-
       <div class="flex bg-white rounded-2xl p-1.5 border-2 border-blue-50 shadow-sm overflow-x-auto max-w-full" id="tabsContainer">
+        <button onclick="switchView('analytics')" id="analyticsBtn"
+                class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 text-blue-700 hover:bg-blue-50 font-extrabold whitespace-nowrap">
+          <i class="fa-solid fa-chart-column icon-18"></i> <span>التحليلات</span>
+        </button>
         <button onclick="switchView('table')" id="tableBtn"
                 class="flex items-center gap-2 px-5 py-2 rounded-xl transition-all duration-200 font-extrabold text-blue-700 hover:bg-blue-50 whitespace-nowrap">
           <i class="fa-solid fa-table-list icon-18"></i> <span>الجدول التفاعلي</span>
@@ -240,6 +300,74 @@
 
     <!-- Views -->
     <div id="mainContainer">
+
+      <!-- Analytics view  -->
+      <div id="analyticsView" class="hidden space-y-6">
+
+        <!-- KPI Row (Top of Analytics) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Total -->
+          <div class="kpi-card glass-card rounded-3xl p-6 shadow-lg">
+            <div class="kpi-label">إجمالي الأحداث</div>
+            <div id="kpiTotal" class="kpi-value">0</div>
+          </div>
+
+          <!-- Completed -->
+          <div class="kpi-card glass-card rounded-3xl p-6 shadow-lg">
+            <div class="kpi-label">المكتملة</div>
+            <div id="kpiDone" class="kpi-value">0</div>
+          </div>
+
+          <!-- Uncompleted -->
+          <div class="kpi-card glass-card rounded-3xl p-6 shadow-lg">
+            <div class="kpi-label">غير المكتملة</div>
+            <div id="kpiOpen" class="kpi-value">0</div>
+          </div>
+
+          <!-- Completion Rate -->
+          <div class="kpi-card glass-card rounded-3xl p-6 shadow-lg">
+            <div class="kpi-label">نسبة الإنجاز</div>
+            <div id="kpiCompletion" class="kpi-value">0%</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="glass-card rounded-3xl p-6 shadow-lg lg:col-span-1">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-black text-blue-900 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-pie text-blue-700 icon-18"></i>
+                  توزيع حسب الموقع
+                </h3>
+              </div>
+            
+              <!-- NEW: donut + legend side-by-side -->
+              <div class="chart-fill">
+                <div class="donut-row">
+                  <div class="donut-canvas">
+                    <canvas id="citiesDonut" height="220"></canvas>
+                  </div>
+                  <div id="citiesLegend" class="donut-legend"></div>
+                </div>
+              </div>              
+          </div>
+
+          <div class="glass-card rounded-3xl p-6 shadow-lg lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-black text-blue-900 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-blue-700 icon-18"></i>
+                عدد الأحداث لكل شهر
+              </h3>
+            </div>
+            <div class="chart-fill w-full">
+              <div class="bar-wrap">
+                <canvas id="eventsPerMonthBar" height="140"></canvas>
+              </div>
+            </div>           
+          </div>
+
+        </div>
+      </div>
 
       <!-- Table View -->
       <div id="tableView" class="glass-card rounded-3xl shadow-lg overflow-hidden border-0">
@@ -501,7 +629,8 @@
     let sortState = { key: 'start', dir: 'desc' }; // default: newest first
 
     // Dashboard chart instance
-    let citiesPieChart = null;
+    let citiesDonutChart = null;
+    let eventsPerMonthChart = null;
 
     function safeLower(v) { return (v || '').toString().toLowerCase(); }
 
@@ -525,10 +654,13 @@
       return 1;
     }
 
-    function getStatusClass(s) {
-      if (s === 'مكتملة') return 'bg-green-600 text-white';
-      if (s === 'قيد التنفيذ') return 'bg-blue-500 text-white';
-      return 'bg-slate-200 text-slate-700';
+    function getStatusClassByState(ev) {
+      const st = getCounterState(ev);
+      if (st.type === 'done') return 'bg-green-600';
+      if (st.type === 'running') return 'bg-amber-500';
+      if (st.type === 'ended') return 'bg-green-600';
+      if (st.type === 'upcoming') return 'bg-blue-600';
+      return 'bg-slate-400';
     }
 
     function formatAssignees(ev) {
@@ -658,44 +790,19 @@
       const done = events.filter(e => (e.status || '').trim() === 'مكتملة' || isEndedByDate(e)).length;
       const open = total - done;
 
+      const completion = total ? Math.round((done / total) * 100) : 0;
+
       const totalEl = document.getElementById('kpiTotal');
       const doneEl = document.getElementById('kpiDone');
       const openEl = document.getElementById('kpiOpen');
+      const completionEl = document.getElementById('kpiCompletion');
 
       if (totalEl) totalEl.textContent = String(total);
       if (doneEl) doneEl.textContent = String(done);
       if (openEl) openEl.textContent = String(open);
-
-      const counts = new Map();
-      events.forEach(e => {
-        const key = getCityLabel(e);
-        counts.set(key, (counts.get(key) || 0) + 1);
-      });
-
-      const labels = Array.from(counts.keys());
-      const data = Array.from(counts.values());
-
-      const canvas = document.getElementById('citiesPie');
-      if (!canvas || typeof Chart === 'undefined') return;
-
-      if (citiesPieChart) {
-        citiesPieChart.destroy();
-        citiesPieChart = null;
-      }
-
-      citiesPieChart = new Chart(canvas, {
-        type: 'pie',
-        data: { labels, datasets: [{ data }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { position: 'bottom', rtl: true, labels: { boxWidth: 10 } },
-            tooltip: { rtl: true }
-          }
-        }
-      });
+      if (completionEl) completionEl.textContent = `${completion}%`;
     }
+
     // -----------------------------------
 
     // ---------- Sorting helpers ----------
@@ -944,7 +1051,7 @@
             </div>
 
             ${dayEvents.map(e => `
-              <div class="text-[10px] text-white p-1.5 rounded-xl mt-1 truncate ${getStatusClass(e.status)}" title="${e.name}">
+              <div class="event-chip truncate ${getStatusClassByState(e)}" title="${e.name}">
                 ${e.name}
               </div>
             `).join('')}
@@ -995,6 +1102,148 @@
       `).join('');
     }
 
+    const arcValueLabelsPlugin = {
+      id: 'arcPercentLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const dataset = chart.data.datasets[0];
+        if (!meta || !dataset) return;
+
+        const total = dataset.data.reduce((s, v) => s + v, 0) || 1;
+
+        ctx.save();
+        ctx.font = '900 12px "Noto Sans Arabic", sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        meta.data.forEach((arc, i) => {
+          const value = dataset.data[i];
+          if (!value) return;
+
+          const angle = arc.endAngle - arc.startAngle;
+          if (angle < 0.28) return;
+
+          const percent = Math.round((value / total) * 100);
+          const p = arc.getCenterPoint();
+          ctx.fillText(`${percent}%`, p.x, p.y);
+        });
+
+        ctx.restore();
+      }
+    };
+
+    function renderAnalytics() {
+      // ---- Donut: events by location ----
+      const counts = new Map();
+      events.forEach(e => {
+        const key = getCityLabel(e);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+
+      const labels = Array.from(counts.keys());
+      const data = Array.from(counts.values());
+
+      const palette = [
+        '#ef6a7a', '#4f8fdc', '#6cc7c0', '#f2c14e', '#f59e0b',
+        '#a78bfa', '#22c55e', '#94a3b8', '#fb7185', '#60a5fa'
+      ];
+      const colors = labels.map((_, i) => palette[i % palette.length]);
+
+      const donutCanvas = document.getElementById('citiesDonut');
+      if (donutCanvas && typeof Chart !== 'undefined') {
+        if (citiesDonutChart) { citiesDonutChart.destroy(); citiesDonutChart = null; }
+
+        citiesDonutChart = new Chart(donutCanvas, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data,
+              backgroundColor: colors,
+              borderColor: '#ffffff',
+              borderWidth: 2,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '62%',
+            plugins: {
+              legend: { display: false },
+              tooltip: { rtl: true }
+            }
+          },
+          plugins: [arcValueLabelsPlugin]
+        });
+      }
+
+      // Legend list
+      const legendEl = document.getElementById('citiesLegend');
+      if (legendEl) {
+        if (!labels.length) {
+          legendEl.innerHTML = `<div class="text-sm font-bold text-slate-500">لا يوجد بيانات</div>`;
+        } else {
+          legendEl.className = 'pie-legend';
+          const total = data.reduce((s, v) => s + v, 0) || 1;
+
+          legendEl.innerHTML = labels.map((lab, i) => {
+            const percent = Math.round((data[i] / total) * 100);
+            return `
+              <div class="legend-item">
+                <div class="legend-left">
+                  <span class="legend-dot" style="background:${colors[i]}"></span>
+                  <span class="legend-label">${lab}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // ---- Bar: events per month (from start YYYY-MM-DD) ----
+      const monthly = new Map(); // YYYY-MM -> count
+      events.forEach(e => {
+        const s = (e.start || '').trim();
+        if (!s || s.length < 7) return;
+        const key = s.slice(0, 7);
+        monthly.set(key, (monthly.get(key) || 0) + 1);
+      });
+
+      const monthLabels = Array.from(monthly.keys()).sort();
+      const monthValues = monthLabels.map(k => monthly.get(k));
+
+      const barCanvas = document.getElementById('eventsPerMonthBar');
+      if (barCanvas && typeof Chart !== 'undefined') {
+        if (eventsPerMonthChart) { eventsPerMonthChart.destroy(); eventsPerMonthChart = null; }
+
+        eventsPerMonthChart = new Chart(barCanvas, {
+          type: 'bar',
+          data: {
+            labels: monthLabels,
+            datasets: [{
+              label: 'عدد الأحداث',
+              data: monthValues,
+              borderRadius: 10
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { rtl: true }
+            },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      }
+    }
+    
     function render() {
       updateSortIndicators();
       updateDashboard();
@@ -1002,12 +1251,14 @@
       renderCards();
       renderCalendar();
       renderDirectory();
+      renderAnalytics();
       applySearchFilter();
     }
 
     function switchView(view) {
       currentView = view;
 
+      document.getElementById('analyticsView').classList.toggle('hidden', view !== 'analytics');
       document.getElementById('tableView').classList.toggle('hidden', view !== 'table');
       document.getElementById('calendarView').classList.toggle('hidden', view !== 'calendar');
       document.getElementById('directoryView').classList.toggle('hidden', view !== 'directory');
@@ -1016,7 +1267,6 @@
       document.getElementById('calendarControls').classList.toggle('flex', view === 'calendar');
 
       document.getElementById('directoryControls').classList.toggle('hidden', view !== 'directory');
-
       document.getElementById('tableSortControls').classList.toggle('hidden', view !== 'table');
 
       document.querySelectorAll('#tabsContainer button').forEach(btn => btn.classList.remove('tab-active'));
@@ -1315,11 +1565,11 @@
       try { await removeWhatsapp(id); }
       catch (err) { console.error('Delete WhatsApp Error:', err); alert('حدث خطأ أثناء حذف مجموعة الواتساب.'); }
     }
-
+    
     // Init
     window.onload = async () => {
       await loadData();
-      switchView('table');
+      switchView('analytics');
       bindSortableHeaders();
       updateSortIndicators();
       document.getElementById('mobileSortSelect').value = `${sortState.key}:${sortState.dir}`;
