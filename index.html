@@ -196,6 +196,36 @@
       .pie-legend{ width:100%; max-width:100%; }
       .legend-label{ max-width: 100%; }
     }
+    /* Donut + legend row */
+    .donut-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    /* Donut fixed size */
+    .donut-canvas {
+      width: 200px;
+      max-width: 50%;
+      flex-shrink: 0;
+    }
+    /* Legend column */
+    .donut-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    /* Mobile fallback */
+    @media (max-width: 1024px) {
+      .donut-row {
+        flex-direction: column;
+      }
+      .donut-canvas {
+        width: 220px;
+        margin: 0 auto;
+      }
+    }
   </style>
 </head>
 
