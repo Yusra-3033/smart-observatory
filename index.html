@@ -457,7 +457,7 @@
 
                 <th class="px-4 py-5 text-right font-black sortable w-[170px]" data-key="counter">
                   <div class="flex items-center justify-between gap-2">
-                    <span>العدّاد</span>
+                    <span>الأيام المتبقية</span>
                     <span class="sort-indicator opacity-90" data-key="counter"></span>
                   </div>
                 </th>
@@ -787,11 +787,11 @@
       }
       // قيد التنفيذ → أصفر / برتقالي
       if (st.type === 'running') {
-        return `<span class="status-badge bg-amber-500 text-white">قيد التنفيذ</span>`;
+        return `<span class="status-badge bg-green-500 text-white">بدأ</span>`;
       }
       // انتهى → أخضر
       if (st.type === 'ended') {
-        return `<span class="status-badge bg-green-600 text-white">انتهى</span>`;
+        return `<span class="status-badge bg-red-600 text-white">انتهى</span>`;
       }
       // متبقي X يوم → أزرق
       if (st.type === 'upcoming') {
