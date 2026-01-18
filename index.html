@@ -694,7 +694,7 @@
       const st = getCounterState(ev);
       if (st.type === 'done') return 'bg-green-600';
       if (st.type === 'running') return 'bg-green-500';
-      if (st.type === 'ended') return 'bg-green-600';
+      if (st.type === 'ended') return 'bg-red-600';
       if (st.type === 'upcoming') return 'bg-blue-600';
       return 'bg-slate-400';
     }
