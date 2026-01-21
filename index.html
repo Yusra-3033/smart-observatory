@@ -718,6 +718,7 @@
         status: (row.status || 'لم تبدأ').trim(),
         start: row.start_date || '',
         end: row.end_date || row.start_date || '',
+        approved: !!row.approved,
         link: row.link || ''
       };
     }
@@ -913,12 +914,17 @@
       const sorted = getSortedEvents(events);
 
       tbody.innerHTML = sorted.map(ev => `
-        <tr class="hover:bg-blue-50/50 transition-all duration-200 event-row"
+        <tr class="hover:bg-blue-50/50 transition-all duration-200 event-row ${ev.approved ? 'bg-green-50' : ''}"
             data-name="${safeLower(ev.name)}"
             data-owner="${safeLower(ev.owner)}">
           <td class="px-6 py-5">
             <div class="font-black text-blue-900">${ev.name}</div>
-            ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[11px] text-blue-600 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square icon-18"></i></a>` : ''}
+            <div class="flex items-center gap-2 mt-1">
+              ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-[11px] text-blue-600 hover:underline">فتح الرابط <i class="fa-solid fa-arrow-up-right-from-square icon-18"></i></a>` : ''}
+              <button onclick="toggleApproval('${ev.id}')" class="text-[11px] font-black px-3 py-1 rounded-xl border transition-all duration-200 ${ev.approved ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'}">
+                ${ev.approved ? 'معتمد' : 'اعتماد'}
+              </button>
+            </div>
           </td>
 
           <td class="px-4 py-5">
@@ -966,7 +972,7 @@
       const sorted = getSortedEvents(events);
 
       wrap.innerHTML = sorted.map(ev => `
-        <div class="bg-white rounded-3xl border border-blue-50 shadow-lg p-5 sm:p-6 space-y-3 event-card hover:scale-[1.01] transition-all duration-200"
+        <div class="bg-white ${ev.approved ? 'bg-green-50' : ''} rounded-3xl border border-blue-50 shadow-lg p-5 sm:p-6 space-y-3 event-card hover:scale-[1.01] transition-all duration-200"
              data-name="${safeLower(ev.name)}"
              data-owner="${safeLower(ev.owner)}">
 
@@ -1009,7 +1015,12 @@
             </div>
           </div>
 
-          ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-xs text-blue-700 underline break-all">رابط الفعالية</a>` : ''}
+          <div class="flex items-center justify-between gap-3">
+            ${ev.link ? `<a href="${ev.link}" target="_blank" class="text-xs text-blue-700 underline break-all">رابط الفعالية</a>` : `<span class="text-xs text-slate-400">بدون رابط</span>`}
+            <button onclick="toggleApproval('${ev.id}')" class="text-[11px] font-black px-3 py-1 rounded-xl border transition-all duration-200 ${ev.approved ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'}">
+              ${ev.approved ? 'معتمد' : 'اعتماد'}
+            </button>
+          </div>
         </div>
       `).join('');
     }
@@ -1359,6 +1370,25 @@
         console.error('Update Status Error:', error);
         await loadData();
       }
+    }
+
+    async function updateApproval(id, newApproved) {
+      // تحديث فوري للواجهة
+      events = events.map(e => (String(e.id) === String(id) ? { ...e, approved: newApproved } : e));
+      renderTable(); renderCards(); renderCalendar(); updateDashboard();
+
+      // حفظ في Supabase
+      const { error } = await supabaseClient.from('events').update({ approved: newApproved }).eq('id', id);
+      if (error) {
+        console.error('Update Approval Error:', error);
+        await loadData(); // استرجاع البيانات في حال فشل التحديث
+      }
+    }
+
+    async function toggleApproval(id) {
+      const ev = events.find(e => String(e.id) === String(id));
+      const next = !ev?.approved;
+      await updateApproval(id, next);
     }
 
     async function upsertEvent(data) {
