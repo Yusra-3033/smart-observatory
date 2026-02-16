@@ -1800,7 +1800,7 @@
     // Init
     window.onload = async () => {
       await loadData();
-      switchView('analytics');
+      switchView('table');
       bindSortableHeaders();
       updateSortIndicators();
       document.getElementById('mobileSortSelect').value = `${sortState.key}:${sortState.dir}`;
